@@ -2,14 +2,14 @@
 using System.IO;
 using System.Text;
 
-using MscrmTools.PortalRecordsMover.AppCode;
+using PortalRecordsMover.AppCode;
 using System.Threading.Tasks;
 
 // Port of the Portal Records Mover http://XrmToolbox.com plugin by Tanguy Touzard
-// Original project: PortalRecordsMover: https://github.com/MscrmTools/MscrmTools.PortalRecordsMover/  
-// This project is console application version of the MscrmTools.PortalRecordsMover plugin included with the XrmToolbox.
+// Original project: PortalRecordsMover: https://github.com/MscrmTools/PortalRecordsMover/  
+// This project is console application version of the PortalRecordsMover plugin included with the XrmToolbox.
 
-namespace MscrmTools.PortalRecordsMover
+namespace PortalRecordsMover
 {
     public class PortalMover
     {
@@ -24,15 +24,15 @@ namespace MscrmTools.PortalRecordsMover
             ReportProgress("Initializing the ExportSettings");
             ExportSettings settings = ExportSettings.InitializeSettings(args);
 
-            if (!string.IsNullOrEmpty(settings.ExportFilename)) {
-                ReportProgress($"Beginning the export - SourceEnvironment: {settings.SourceEnvironment}, ExportFilename:{settings.ExportFilename}");
+            if (!string.IsNullOrEmpty(settings.Config.ExportFilename)) {
+                ReportProgress($"Beginning the export - SourceEnvironment: {settings.Config.SourceEnvironment}, ExportFilename:{settings.Config.ExportFilename}");
                 var exporter = new Exporter(settings);
                 exporter.Export();
             }
 
             // if ImportFile is not null, then perform the import
-            if (!string.IsNullOrEmpty(settings.ImportFilename)) {
-                ReportProgress($"Beginning the Import - TargetEnvironment: {settings.TargetEnvironment}, ImportFilename:{settings.ImportFilename}");
+            if (!string.IsNullOrEmpty(settings.Config.ImportFilename)) {
+                ReportProgress($"Beginning the Import - TargetEnvironment: {settings.Config.TargetEnvironment}, ImportFilename:{settings.Config.ImportFilename}");
                 var importer = new Importer(settings);
                 importer.Import();
             }

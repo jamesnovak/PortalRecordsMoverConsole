@@ -6,60 +6,36 @@ using Microsoft.Xrm.Sdk.Metadata;
 using System.Text;
 using System.IO;
 
-namespace MscrmTools.PortalRecordsMover.AppCode
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+
+namespace PortalRecordsMover.AppCode
 {
     public class ExportSettings
     {
         public ExportSettings()
         {
-            SelectedEntities = new List<string>();
-            SettingsFileName = "PortalRecordsMover.settings.xml";
+            SettingsFileName = "ExportSettings.json";
         }
 
         #region Properties 
-        public enum DateFilterOptionsEnum {
-            CreateOnly = 1,
-            ModifyOnly, 
-            CreateAndModify
-        }
-
         public string SettingsFileName { get; set; }
 
-        // Use this number of days to calculate CreateFilter and ModifyFilter
-        public int? PriorDaysToRetrieve { get; set; }
+        private MoverSettingsConfig config;
+        public MoverSettingsConfig Config { get => config; set => config = value; }
 
-        public bool ActiveItemsOnly { get; set; }
-        public DateTime? CreateFilter { get; set; }
-        public DateTime? ModifyFilter { get; set; }
-        public int BatchCount { get; set; }
-        public DateFilterOptionsEnum DateFilterOptions { get; set; }
-        public Guid WebsiteFilter { get; set; }
-        public string ExportFilename { get; set; }
-        public string ImportFilename { get; set; }
-        public string SourceEnvironment { get; set; }
-        public string TargetEnvironment { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-
-        public List<string> SelectedEntities { get; set; }
-
-        public List<WebsiteIdMap> WebsiteIdMaping { get; set; }
-
-        [XmlIgnore]
         public string SourceConnectionString {
-            get { return $"RequireNewInstance=True;AuthType=Office365;Username={Username}; Password={Password};Url={SourceEnvironment}"; }
+            get { return $"RequireNewInstance=True;AuthType=Office365;Username={config.Username}; Password={config.Password};Url={config.SourceEnvironment}"; }
         }
-        [XmlIgnore]
         public string TargetConnectionString {
-            get { return $"RequireNewInstance=True;AuthType=Office365;Username={Username}; Password={Password};Url={TargetEnvironment}"; }
+            get { return $"RequireNewInstance=True;AuthType=Office365;Username={config.Username}; Password={config.Password};Url={config.TargetEnvironment}"; }
         }
 
-        [XmlIgnore]
         public List<EntityMetadata> Entities {
-            get { return AllEntities.Where(e => SelectedEntities.Contains(e.LogicalName)).ToList(); }
+            get { return AllEntities.Where(e => config.SelectedEntities.Contains(e.LogicalName)).ToList(); }
         }
 
-        [XmlIgnore]
         public List<EntityMetadata> AllEntities { get; set; }
         #endregion
 
@@ -72,27 +48,22 @@ namespace MscrmTools.PortalRecordsMover.AppCode
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"ActiveItemsOnly: {ActiveItemsOnly}")
-                .AppendLine($"CreateFilter: {CreateFilter}")
-                .AppendLine($"ModifyFilter: {ModifyFilter}")
-                .AppendLine($"DateFilterOptions: {DateFilterOptions}")
-                .AppendLine($"BatchCount: {BatchCount}")
-                .AppendLine($"WebsiteFilter: {WebsiteFilter}")
-                .AppendLine($"ImportFilename: {ImportFilename}")
-                .AppendLine($"ExportFilename: {ExportFilename}")
-                .AppendLine($"PriorDaysToRetrieve: {PriorDaysToRetrieve}")
-                .AppendLine($"Username: {Username}")
-                .AppendLine($"Password: {Password}")
-                .AppendLine($"SourceEnvironment: {SourceEnvironment}")
+            sb.AppendLine($"ActiveItemsOnly: {config.ActiveItemsOnly}")
+                .AppendLine($"CreateFilter: {config.CreateFilter}")
+                .AppendLine($"ModifyFilter: {config.ModifyFilter}")
+                .AppendLine($"DateFilterOptions: {config.DateFilterOptions}")
+                .AppendLine($"BatchCount: {config.BatchCount}")
+                .AppendLine($"WebsiteFilter: {config.WebsiteFilter}")
+                .AppendLine($"ImportFilename: {config.ImportFilename}")
+                .AppendLine($"ExportFilename: {config.ExportFilename}")
+                .AppendLine($"PriorDaysToRetrieve: {config.PriorDaysToRetrieve}")
+                .AppendLine($"Username: {config.Username}")
+                .AppendLine($"Password: {config.Password}")
+                .AppendLine($"SourceEnvironment: {config.SourceEnvironment}")
                 .AppendLine($"SourceConnectionString: {SourceConnectionString}")
-                .AppendLine($"TargetEnvironment: {TargetEnvironment}")
+                .AppendLine($"TargetEnvironment: {config.TargetEnvironment}")
                 .AppendLine($"TargetConnectionString: {TargetConnectionString}")
-                .AppendLine($"SelectedEntities:\n{string.Join(", ", SelectedEntities.ToArray())}");
-
-            //foreach (var entity in SelectedEntities)
-            //{
-            //    sb.AppendLine($"\t{entity}");
-            //}
+                .AppendLine($"SelectedEntities:\n{string.Join(", ", config.SelectedEntities.ToArray())}");
 
             return sb.ToString();
         }
@@ -129,9 +100,10 @@ namespace MscrmTools.PortalRecordsMover.AppCode
 
             // load the settings file
             if (File.Exists(settings.SettingsFileName)) {
-                using (TextReader txtReader = new StreamReader(settings.SettingsFileName)) {
-                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(ExportSettings));
-                    settings = (ExportSettings)xmlSerializer.Deserialize(txtReader);
+                using (TextReader txtReader = new StreamReader(settings.SettingsFileName)) 
+                {
+                    var jsonString = txtReader.ReadToEnd();
+                    settings.Config = MoverSettingsConfig.FromJson(jsonString);
                 }
             }
             else {
@@ -147,68 +119,68 @@ namespace MscrmTools.PortalRecordsMover.AppCode
                 {
                     case "createdon":
                         if (DateTime.TryParse(arg.Value, out dt)) {
-                            settings.CreateFilter = dt;
+                            settings.Config.CreateFilter = dt;
                         }
                         else {
-                            settings.CreateFilter = null;
+                            settings.Config.CreateFilter = null;
                         }
                         break;
                     case "modifiedon":
                         if (DateTime.TryParse(arg.Value, out dt)) {
-                            settings.ModifyFilter = dt;
+                            settings.Config.ModifyFilter = dt;
                         }
                         else {
-                            settings.ModifyFilter = null;
+                            settings.Config.ModifyFilter = null;
                         }
                         break;
                     case "activeonly":
                         if (bool.TryParse(arg.Value, out var b)) {
-                            settings.ActiveItemsOnly = b;
+                            settings.Config.ActiveItemsOnly = b;
                         }
                         break;
                     case "website":
                         if (!string.IsNullOrEmpty(arg.Value)) {
-                            settings.WebsiteFilter = Guid.Parse(arg.Value);
+                            settings.Config.WebsiteFilter = Guid.Parse(arg.Value);
                         }
                         break;
                     case "exportfile":
-                            settings.ExportFilename = arg.Value;
+                        settings.Config.ExportFilename = arg.Value;
                         break;
                     case "importfile":
-                            settings.ImportFilename = arg.Value;
+                        settings.Config.ImportFilename = arg.Value;
                         break;
                     case "priordays":
                         if (int.TryParse(arg.Value, out var i)) {
-                            settings.PriorDaysToRetrieve = i;
+                            settings.Config.PriorDaysToRetrieve = i;
                         }
                         else {
-                            settings.PriorDaysToRetrieve = null;
+                            settings.Config.PriorDaysToRetrieve = null;
                         }
                         break;
                     case "targetenv":
-                            settings.TargetEnvironment = arg.Value;
+                        settings.Config.TargetEnvironment = arg.Value;
                         break;
                     case "sourceenv":
-                            settings.SourceEnvironment = arg.Value;
+                        settings.Config.SourceEnvironment = arg.Value;
                         break;
                     case "user":
-                            settings.SourceEnvironment = arg.Value;
+                        settings.Config.SourceEnvironment = arg.Value;
                         break;
                     case "pass":
-                        settings.SourceEnvironment = arg.Value;
+                        settings.Config.SourceEnvironment = arg.Value;
                         break;
 
                     case "batchcount":
-                        settings.BatchCount = 10;
+                        settings.Config.BatchCount = 10;
                         if (int.TryParse(arg.Value, out var bc)) {
-                            settings.BatchCount = bc;
+                            settings.Config.BatchCount = bc;
                         }
                         break;
 
                     case "datefilteroptions":
-                        settings.DateFilterOptions = DateFilterOptionsEnum.CreateAndModify;
+                        settings.Config.DateFilterOptions = DateFilterOptionsEnum.CreateAndModify;
                         if (Enum.TryParse<DateFilterOptionsEnum>(arg.Value, out DateFilterOptionsEnum df)) {
-                            settings.DateFilterOptions = df;
+                            settings.Config.DateFilterOptions = df;
                         }
                         break;
 
@@ -218,11 +190,11 @@ namespace MscrmTools.PortalRecordsMover.AppCode
             }
 
             // defaults~
-            if (settings.BatchCount == 0) {
-                settings.BatchCount = 10;
+            if (settings.Config.BatchCount == 0) {
+                settings.Config.BatchCount = 10;
             }
-            if (settings.DateFilterOptions == 0) {
-                settings.DateFilterOptions = DateFilterOptionsEnum.CreateAndModify;
+            if (settings.Config.DateFilterOptions == 0) {
+                settings.Config.DateFilterOptions = DateFilterOptionsEnum.CreateAndModify;
             }
 
             // Only use the date part so we start at midnight on the day we want
@@ -230,55 +202,55 @@ namespace MscrmTools.PortalRecordsMover.AppCode
 
             // if the prior days has been set, then override it with the calculated value 
             // this allows us to say, retrieve the last X days worth of records vs specifying a date
-            if (settings.PriorDaysToRetrieve != null) 
+            if (settings.Config.PriorDaysToRetrieve != null) 
             {
                 // override and update based on date filter options
-                var dateFilter = now.AddDays((double)-settings.PriorDaysToRetrieve);
+                var dateFilter = now.AddDays((double)-settings.Config.PriorDaysToRetrieve);
 
-                settings.CreateFilter = dateFilter;
-                settings.ModifyFilter = dateFilter;
+                settings.Config.CreateFilter = dateFilter;
+                settings.Config.ModifyFilter = dateFilter;
             }
             // null out dates we don't want 
-            if (settings.DateFilterOptions == DateFilterOptionsEnum.ModifyOnly) {
-                settings.CreateFilter = null;
+            if (settings.Config.DateFilterOptions == DateFilterOptionsEnum.ModifyOnly) {
+                settings.Config.CreateFilter = null;
             }
 
-            if (settings.DateFilterOptions == DateFilterOptionsEnum.CreateOnly) {
-                settings.ModifyFilter = null;
+            if (settings.Config.DateFilterOptions == DateFilterOptionsEnum.CreateOnly) {
+                settings.Config.ModifyFilter = null;
             }
             // make sure we have some required values set
             // TODO  look at impact of making this optional?
-            if (settings.WebsiteFilter == Guid.Empty) {
+            if (settings.Config.WebsiteFilter == Guid.Empty) {
                 throw new ArgumentNullException("WebsiteFilter must be specified");
             }
 
-            if ((settings.CreateFilter == null) && (settings.ModifyFilter == null)) {
+            if ((settings.Config.CreateFilter == null) && (settings.Config.ModifyFilter == null)) {
                 throw new ArgumentNullException("Either CreateFilter or ModifyFilter must be specified");
             }
 
             // make sure we have some required values set
-            if (string.IsNullOrEmpty(settings.ImportFilename) && string.IsNullOrEmpty(settings.ExportFilename)) {
+            if (string.IsNullOrEmpty(settings.Config.ImportFilename) && string.IsNullOrEmpty(settings.Config.ExportFilename)) {
                 throw new ArgumentNullException("Either ImportFilename or ExportFilename must be specified");
             }
 
-            if (!string.IsNullOrEmpty(settings.ImportFilename) && string.IsNullOrEmpty(settings.TargetEnvironment)) {
+            if (!string.IsNullOrEmpty(settings.Config.ImportFilename) && string.IsNullOrEmpty(settings.Config.TargetEnvironment)) {
                 throw new ArgumentNullException("TargetEnvironment must be specified if ImportFilename is specified");
             }
 
-            if (!string.IsNullOrEmpty(settings.ExportFilename) && string.IsNullOrEmpty(settings.SourceEnvironment)) {
+            if (!string.IsNullOrEmpty(settings.Config.ExportFilename) && string.IsNullOrEmpty(settings.Config.SourceEnvironment)) {
                 throw new ArgumentNullException("SourceEnvironment must be specified if ExportFilename is specified");
             }
 
-            if (string.IsNullOrEmpty(settings.Username) || string.IsNullOrEmpty(settings.Password)) {
+            if (string.IsNullOrEmpty(settings.Config.Username) || string.IsNullOrEmpty(settings.Config.Password)) {
                 throw new ArgumentNullException("User name and password must be specified");
             }
 
             // update the import/export file name with the date, if the mask is present
-            if (!string.IsNullOrEmpty(settings.ExportFilename)) {
-                settings.ExportFilename = string.Format(settings.ExportFilename, now);
+            if (!string.IsNullOrEmpty(settings.Config.ExportFilename)) {
+                settings.Config.ExportFilename = string.Format(settings.Config.ExportFilename, now);
             }
-            if (!string.IsNullOrEmpty(settings.ImportFilename)) {
-                settings.ImportFilename = string.Format(settings.ImportFilename, now);
+            if (!string.IsNullOrEmpty(settings.Config.ImportFilename)) {
+                settings.Config.ImportFilename = string.Format(settings.Config.ImportFilename, now);
             }
 
             // tell us what we have... 
@@ -287,14 +259,5 @@ namespace MscrmTools.PortalRecordsMover.AppCode
             return settings;
         }
         #endregion
-    }
-
-    /// <summary>
-    /// Helper class to capture the mapping of website IDs from one environment to the other
-    /// </summary>
-    public class WebsiteIdMap
-    {
-        public Guid SourceId { get; set; }
-        public Guid TargetId { get; set; }
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Metadata.Query;
 
-namespace MscrmTools.PortalRecordsMover.AppCode
+namespace PortalRecordsMover.AppCode
 {
     public static class MetadataManager
     {

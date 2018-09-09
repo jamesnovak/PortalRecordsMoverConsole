@@ -7,7 +7,7 @@ using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using PortalRecordsMover.AppCode;
 
-namespace MscrmTools.PortalRecordsMover.AppCode
+namespace PortalRecordsMover.AppCode
 {
     internal class RecordManager
     {

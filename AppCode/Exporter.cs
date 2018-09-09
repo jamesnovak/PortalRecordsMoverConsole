@@ -10,7 +10,7 @@ using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Tooling.Connector;
 using Microsoft.Xrm.Sdk.Messages;
 
-namespace MscrmTools.PortalRecordsMover.AppCode
+namespace PortalRecordsMover.AppCode
 {
     public class Exporter
     {
@@ -22,7 +22,7 @@ namespace MscrmTools.PortalRecordsMover.AppCode
 
         public Exporter(ExportSettings settings)
         {
-            this.Settings = settings;
+            Settings = settings;
             Service = new CrmServiceClient(Settings.SourceConnectionString);
         }
 
@@ -70,7 +70,7 @@ namespace MscrmTools.PortalRecordsMover.AppCode
             void RetrieveRecordsForExport()
             {
                 // load metadata for this environment 
-                PortalMover.ReportProgress($"Loading Metadata for current environment: {Settings.SourceEnvironment}");
+                PortalMover.ReportProgress($"Loading Metadata for current environment: {Settings.Config.SourceEnvironment}");
                 Settings.AllEntities = MetadataManager.GetEntitiesList(Service).ToList();
 
                 // load records based on the date settings: entities list, filters, etc.
@@ -107,10 +107,10 @@ namespace MscrmTools.PortalRecordsMover.AppCode
                 var xwSettings = new XmlWriterSettings { Indent = true };
                 var serializer = new DataContractSerializer(typeof(EntityCollection), new List<Type> { typeof(Entity) });
 
-                using (var w = XmlWriter.Create(Settings.ExportFilename, xwSettings)) {
+                using (var w = XmlWriter.Create(Settings.Config.ExportFilename, xwSettings)) {
                     serializer.WriteObject(w, exportRecords);
                 }
-                PortalMover.ReportProgress($"Records exported to {Settings.ExportFilename}!");
+                PortalMover.ReportProgress($"Records exported to {Settings.Config.ExportFilename}!");
             }
         }
 
@@ -159,7 +159,7 @@ namespace MscrmTools.PortalRecordsMover.AppCode
                 execMulti.Requests.Add(GetRetieveMultipleRequest(entity, Settings));
                 ++counter;
                 // batch in tens, or until we reach the end
-                if ((currList.Count == Settings.BatchCount) || (Settings.Entities.Count == counter)) {
+                if ((currList.Count == Settings.Config.BatchCount) || (Settings.Entities.Count == counter)) {
 
                     PortalMover.ReportProgress($"Begin Execute Multiple Request for entity records:\n{string.Join(", ", currList.ToArray())}");
                     var multiResults = Service.Execute(execMulti) as ExecuteMultipleResponse;
@@ -218,26 +218,25 @@ namespace MscrmTools.PortalRecordsMover.AppCode
             // filter by either the created on OR the modified on 
             var dateFilter = new FilterExpression(LogicalOperator.Or);
 
-            if (settings.CreateFilter.HasValue) {
+            if (settings.Config.CreateFilter.HasValue) {
                 dateFilter.Filters.Add(new FilterExpression(LogicalOperator.Or));
-                dateFilter.Conditions.Add(new ConditionExpression("createdon", ConditionOperator.OnOrAfter, settings.CreateFilter.Value.ToString("yyyy-MM-dd")));
+                dateFilter.Conditions.Add(new ConditionExpression("createdon", ConditionOperator.OnOrAfter, settings.Config.CreateFilter.Value.ToString("yyyy-MM-dd")));
             }
 
-            if (settings.ModifyFilter.HasValue) {
+            if (settings.Config.ModifyFilter.HasValue) {
                 dateFilter.Filters.Add(new FilterExpression(LogicalOperator.Or));
-                dateFilter.Conditions.Add(new ConditionExpression("modifiedon", ConditionOperator.OnOrAfter, settings.ModifyFilter.Value.ToString("yyyy-MM-dd")));
-                // query.Criteria.AddCondition("modifiedon", ConditionOperator.OnOrAfter, settings.ModifyFilter.Value.ToString("yyyy-MM-dd"));
+                dateFilter.Conditions.Add(new ConditionExpression("modifiedon", ConditionOperator.OnOrAfter, settings.Config.ModifyFilter.Value.ToString("yyyy-MM-dd")));
             }
 
             // add the OR date filter for createdon and modified on
             query.Criteria.Filters.Add(dateFilter);
 
-            if (settings.WebsiteFilter != Guid.Empty && emd.Attributes.Any(a => a is LookupAttributeMetadata && ((LookupAttributeMetadata)a).Targets[0] == "adx_website")) {
-                query.Criteria.AddCondition("adx_websiteid", ConditionOperator.Equal, settings.WebsiteFilter);
+            if (settings.Config.WebsiteFilter != Guid.Empty && emd.Attributes.Any(a => a is LookupAttributeMetadata && ((LookupAttributeMetadata)a).Targets[0] == "adx_website")) {
+                query.Criteria.AddCondition("adx_websiteid", ConditionOperator.Equal, settings.Config.WebsiteFilter);
             }
 
             // add the Active check if the statecode attribute is present
-            if (settings.ActiveItemsOnly && (emd.Attributes.Where(a => a.LogicalName == "statecode").ToArray().Length > 0)) {
+            if (settings.Config.ActiveItemsOnly && (emd.Attributes.Where(a => a.LogicalName == "statecode").ToArray().Length > 0)) {
                 query.Criteria.AddCondition("statecode", ConditionOperator.Equal, 0);
             }
 

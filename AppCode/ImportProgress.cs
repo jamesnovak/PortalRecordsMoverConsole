@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Xrm.Sdk.Metadata;
 
-namespace MscrmTools.PortalRecordsMover.AppCode
+namespace PortalRecordsMover.AppCode
 {
     internal class ImportProgress : ICloneable
     {

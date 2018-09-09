@@ -8,7 +8,7 @@ using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Tooling.Connector;
 
-namespace MscrmTools.PortalRecordsMover.AppCode
+namespace PortalRecordsMover.AppCode
 {
     /// <summary>
     /// Handles the import of a website data file into the Target System 
@@ -29,8 +29,8 @@ namespace MscrmTools.PortalRecordsMover.AppCode
 
         public void Import()
         {
-            if (!File.Exists(Settings.ImportFilename)) {
-                throw new ApplicationException($"The file {Settings.ImportFilename} does not exist!");
+            if (!File.Exists(Settings.Config.ImportFilename)) {
+                throw new ApplicationException($"The file {Settings.Config.ImportFilename} does not exist!");
             }
 
             EntityCollection entities;
@@ -42,8 +42,8 @@ namespace MscrmTools.PortalRecordsMover.AppCode
             void InitializeRecordsForImport() {
 
                 // load the file from disk, deserialize 
-                PortalMover.ReportProgress($"Deserializing ImportFileName: {Settings.ImportFilename}");
-                using (var reader = new StreamReader(Settings.ImportFilename))
+                PortalMover.ReportProgress($"Deserializing ImportFileName: {Settings.Config.ImportFilename}");
+                using (var reader = new StreamReader(Settings.Config.ImportFilename))
                 {
                     var serializer = new DataContractSerializer(typeof(EntityCollection), new List<Type> { typeof(Entity) });
                     entities = (EntityCollection)serializer.ReadObject(reader.BaseStream);
@@ -58,7 +58,7 @@ namespace MscrmTools.PortalRecordsMover.AppCode
                 if (!AllWebsiteIdsMap())
                 {
                     // loop on all of the website Id mappings
-                    foreach (var map in Settings.WebsiteIdMaping) 
+                    foreach (var map in Settings.Config.WebsiteIdMapping) 
                     {
                         // find all attributes for the list of entities and update the original ID to that in the mapping 
                         var attribs = entities.Entities.SelectMany(ent => ent.Attributes)
@@ -81,7 +81,7 @@ namespace MscrmTools.PortalRecordsMover.AppCode
             void DoImport()
             {
                 // load metadata for this environment 
-                PortalMover.ReportProgress($"Loading Metadata for current environment: {Settings.TargetEnvironment}");
+                PortalMover.ReportProgress($"Loading Metadata for current environment: {Settings.Config.TargetEnvironment}");
                 Settings.AllEntities = MetadataManager.GetEntitiesList(Service).ToList();
 
                 PortalMover.ReportProgress("Processing records for import");

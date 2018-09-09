@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xrm.Sdk;
 
-namespace MscrmTools.PortalRecordsMover.AppCode
+namespace PortalRecordsMover.AppCode
 {
     internal class ExportResults
     {

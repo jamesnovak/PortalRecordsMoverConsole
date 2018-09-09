@@ -1,0 +1,63 @@
+{
+  "ActiveItemsOnly": true,
+  "CreateFilter": "2017-11-24T12:00:00",
+  "ModifyFilter": "2017-11-24T12:00:00",
+
+  "PriorDaysToRetrieve": "18",
+
+  /* Enum values, either number or name will work: CreateOnly=1, ModifyOnly, CreateAndModify
+  */
+  "DateFilterOptions": "CreateAndModify",
+  "WebsiteFilter": "be03bb66-e778-49ee-9663-d6db99b72d96",
+
+  /*
+    you can specify a date format mask here and the current date time will be added. 
+      Use same value to export from the Source environment and immediately import into the Target
+  */
+  "ExportFilename": "portal export {0:yyyy-MM-dd}.xml",
+  "ImportFilename": "portal export {0:yyyy-MM-dd}.xml",
+
+  "SourceEnvironment": "dev",
+  "TargetEnvironment": "test",
+  "Username": "user",
+  "Password": "pass",
+
+  "BatchCount": "10",
+  "WebsiteIdMapping": [
+    {
+      "SourceId": "be03bb66-e778-49ee-9663-d6db99b72d96",
+      "TargetId": "be03bb66-e778-49ee-9663-d6db99b72d96"
+    }
+  ],
+  "SelectedEntities": [
+    "adx_autonumberingdefinition",
+    "adx_contentsnippet",
+    "adx_entityform",
+    "adx_entityformmetadata",
+    "adx_entitylist",
+    "adx_entitypermission",
+    "adx_licensekey",
+    "adx_pagetemplate",
+    "adx_publishingstate",
+    "adx_setting",
+    "adx_shortcut",
+    "adx_sitemarker",
+    "adx_sitesetting",
+    "adx_webform",
+    "adx_webformmetadata",
+    "adx_webformstep",
+    "adx_weblink",
+    "adx_weblinkset",
+    "adx_webnotificationentity",
+    "adx_webnotificationurl",
+    "adx_webpage",
+    "adx_webpageaccesscontrolrule",
+    "adx_webrole",
+    "adx_website",
+    "adx_websiteaccess",
+    "adx_websitebinding",
+    "adx_webtemplate",
+    "adx_webfile"
+  ]
+
+}
