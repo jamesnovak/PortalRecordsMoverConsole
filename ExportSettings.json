@@ -3,7 +3,10 @@
   "CreateFilter": "2017-11-24T12:00:00",
   "ModifyFilter": "2017-11-24T12:00:00",
 
-  "PriorDaysToRetrieve": "18",
+
+  /* Set to 0 to ignore
+  */
+  "PriorDaysToRetrieve": "0",
 
   /* Enum values, either number or name will work: CreateOnly=1, ModifyOnly, CreateAndModify
   */
