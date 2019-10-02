@@ -164,10 +164,10 @@ namespace PortalRecordsMover.AppCode
                         settings.Config.SourceEnvironment = arg.Value;
                         break;
                     case "user":
-                        settings.Config.SourceEnvironment = arg.Value;
+                        settings.Config.Username = arg.Value;
                         break;
                     case "pass":
-                        settings.Config.SourceEnvironment = arg.Value;
+                        settings.Config.Password = arg.Value;
                         break;
 
                     case "batchcount":
