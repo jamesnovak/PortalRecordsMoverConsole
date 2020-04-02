@@ -29,6 +29,6 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         # Artifact name
-        name: PortalRecordsMoverConsole
+        name: 'PortalRecordsMoverConsole'
         # Directory containing files to upload
-        path: bin/release/net472/publish/*
+        path: 'bin/release/net472/publish/*.*'
