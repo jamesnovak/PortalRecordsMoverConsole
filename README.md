@@ -1,4 +1,5 @@
 # PortalRecordsMoverConsole
+![.NET Core](https://github.com/leiyu66/PortalRecordsMoverConsole/workflows/.NET%20Core/badge.svg)
 ## Port of the Portal Records Mover [XrmToolbox](http://XrmToolbox.com) plugin by Tanguy Touzard
 
 Original project: [PortalRecordsMover](https://github.com/MscrmTools/MscrmTools.PortalRecordsMover/)  
