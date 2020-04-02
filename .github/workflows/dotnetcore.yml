@@ -31,4 +31,4 @@ jobs:
         # Artifact name
         name: 'PortalRecordsMoverConsole'
         # Directory containing files to upload
-        path: 'bin/release/net472/publish/*.*'
+        path: 'bin/release/net472/publish'
