@@ -164,10 +164,10 @@ namespace PortalRecordsMover.AppCode
                         settings.Config.SourceEnvironment = arg.Value;
                         break;
                     case "user":
-                        settings.Config.SourceEnvironment = arg.Value;
+                        settings.Config.Username = arg.Value;
                         break;
                     case "pass":
-                        settings.Config.SourceEnvironment = arg.Value;
+                        settings.Config.Password = arg.Value;
                         break;
 
                     case "batchcount":
@@ -202,7 +202,7 @@ namespace PortalRecordsMover.AppCode
 
             // if the prior days has been set, then override it with the calculated value 
             // this allows us to say, retrieve the last X days worth of records vs specifying a date
-            if (settings.Config.PriorDaysToRetrieve != null) 
+            if (settings.Config.PriorDaysToRetrieve != null || settings.Config.PriorDaysToRetrieve > 0) 
             {
                 // override and update based on date filter options
                 var dateFilter = now.AddDays((double)-settings.Config.PriorDaysToRetrieve);
