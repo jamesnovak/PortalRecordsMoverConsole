@@ -17,17 +17,12 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101
-        source-url: https://nuget.pkg.github.com/leiyu66/index.json
-      env:
-        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     - name: Install dependencies
       run: dotnet restore --source nuget.org
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --verbosity normal
-    - name: Push nuget
-      run: dotnet nuget push "bin/Release/PortalRecordsMoverConsole.*.nupkg" --source "github"
     - name: Publish
       run: dotnet publish --configuration Release --no-build
     - name: Upload artifacts
@@ -37,3 +32,11 @@ jobs:
         name: 'PortalRecordsMoverConsole'
         # Directory containing files to upload
         path: 'bin/release/net472/publish'
+    - name: Setup GitHub Authentication
+      uses: actions/setup-dotnet@v1
+      with:
+        source-url: https://nuget.pkg.github.com/leiyu66/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    - name: Push nuget
+      run: dotnet nuget push "bin/Release/PortalRecordsMoverConsole.*.nupkg" --source "https://nuget.pkg.github.com/leiyu66"
