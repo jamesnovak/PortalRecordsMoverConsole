@@ -16,6 +16,7 @@
     <Description>This project is console application version of the  MscrmTools.PortalRecordsMover plugin included with the XrmToolbox.</Description>
     <PackageProjectUrl>https://github.com/leiyu66/PortalRecordsMoverConsole</PackageProjectUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
+    <RepositoryUrl>https://github.com/leiyu66/PortalRecordsMoverConsole</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <None Include="ExportSettings.json">

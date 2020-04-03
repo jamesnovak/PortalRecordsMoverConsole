@@ -24,7 +24,7 @@ jobs:
     - name: Test
       run: dotnet test --no-restore --verbosity normal
     - name: Push nuget
-      run: dotnet nuget push "bin/Release/PortalRecordsMoverConsole.0.1.3.nupkg" --source "github"
+      run: dotnet nuget push "bin/Release/PortalRecordsMoverConsole.0.1.3.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
     - name: Publish
       run: dotnet publish --configuration Release --no-build
     - name: Upload artifacts
