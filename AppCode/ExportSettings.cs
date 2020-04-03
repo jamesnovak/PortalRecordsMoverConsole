@@ -58,7 +58,7 @@ namespace PortalRecordsMover.AppCode
                 .AppendLine($"ExportFilename: {config.ExportFilename}")
                 .AppendLine($"PriorDaysToRetrieve: {config.PriorDaysToRetrieve}")
                 .AppendLine($"Username: {config.Username}")
-                .AppendLine($"Password: {config.Password}")
+                .AppendLine($"Password: ********")
                 .AppendLine($"SourceEnvironment: {config.SourceEnvironment}")
                 .AppendLine($"SourceConnectionString: {SourceConnectionString}")
                 .AppendLine($"TargetEnvironment: {config.TargetEnvironment}")
