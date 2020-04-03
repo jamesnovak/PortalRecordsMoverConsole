@@ -5,10 +5,25 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <OutputType>Exe</OutputType>
     <TargetFramework>net472</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>GPL v3</Copyright>
+    <PackageId>PortalRecordsMoverConsole</PackageId>
+    <Version>0.1.3</Version>
+    <Authors>PortalRecordsMoverConsole authors</Authors>
+    <Product>PortalRecordsMoverConsole</Product>
+    <Company>N/A</Company>
+    <Description>This project is console application version of the  MscrmTools.PortalRecordsMover plugin included with the XrmToolbox.</Description>
+    <PackageProjectUrl>https://github.com/leiyu66/PortalRecordsMoverConsole</PackageProjectUrl>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
   <ItemGroup>
     <None Include="ExportSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
     </None>
     <None Include="portal_mover.cmd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
