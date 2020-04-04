@@ -33,4 +33,4 @@ jobs:
         # Directory containing files to upload
         path: 'bin/release/net472/publish'
     - name: Push nuget
-      run: dotnet nuget push bin/Release/PortalRecordsMoverConsole.*.nupkg --source https://nuget.pkg.github.com/leiyu66 --api-key ${{secrets.GITHUB_TOKEN}}
+      run: dotnet nuget push bin\Release\PortalRecordsMoverConsole.0.1.3.nupkg --source https://nuget.pkg.github.com/leiyu66 --api-key ${{secrets.GITHUB_TOKEN}}
