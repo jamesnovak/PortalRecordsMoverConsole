@@ -24,7 +24,7 @@ jobs:
     - name: Test
       run: dotnet test --no-restore --verbosity normal
     - name: Push NuGet Package
-      run: dotnet nuget push bin\Release\PortalRecordsMoverConsole.*.nupkg --api-key ${{secrets.NUGET_API_KEY}}
+      run: dotnet nuget push bin\Release\PortalRecordsMoverConsole.*.nupkg --source https://www.nuget.org --api-key ${{secrets.NUGET_API_KEY}}
     - name: Publish
       run: dotnet publish --configuration Release --no-build
     - name: Upload artifacts
