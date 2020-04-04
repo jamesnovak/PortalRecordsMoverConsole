@@ -32,11 +32,5 @@ jobs:
         name: 'PortalRecordsMoverConsole'
         # Directory containing files to upload
         path: 'bin/release/net472/publish'
-    - name: Setup GitHub Authentication
-      uses: actions/setup-dotnet@v1
-      with:
-        source-url: https://nuget.pkg.github.com/leiyu66/index.json
-      env:
-        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     - name: Push nuget
-      run: dotnet nuget push "bin/Release/PortalRecordsMoverConsole.*.nupkg" --source "https://nuget.pkg.github.com/leiyu66"
+      run: dotnet nuget push bin/Release/PortalRecordsMoverConsole.*.nupkg --source https://nuget.pkg.github.com/leiyu66 --api-key ${{secrets.GITHUB_TOKEN}}
