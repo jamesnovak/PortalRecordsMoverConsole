@@ -23,6 +23,8 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --verbosity normal
+    - name: Push NuGet Package
+      run: dotnet nuget push bin\Release\PortalRecordsMoverConsole.*.nupkg --api-key ${{secrets.NUGET_API_KEY}}
     - name: Publish
       run: dotnet publish --configuration Release --no-build
     - name: Upload artifacts
@@ -39,5 +41,5 @@ jobs:
         source-url: https://nuget.pkg.github.com/leiyu66/index.json
       env:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-    - name: Push nuget
+    - name: Push GitHub Package
       run: dotnet nuget push bin\Release\PortalRecordsMoverConsole.*.nupkg
