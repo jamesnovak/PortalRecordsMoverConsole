@@ -39,7 +39,6 @@ namespace PortalRecordsMover
 
             // output the log file
             SaveLogFile().Wait();
-            Console.ReadKey();
         }
 
         /// <summary>
