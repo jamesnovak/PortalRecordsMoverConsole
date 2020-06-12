@@ -19,22 +19,27 @@ namespace PortalRecordsMover
 
         public static StringBuilder Logger { get => _logger; }
 
-        static void Main(string[] args) {
+        static void Main(string[] args) 
+        {
             // process the settings from file and then override with command line args, if any
             ReportProgress("Initializing the ExportSettings");
             ExportSettings settings = ExportSettings.InitializeSettings(args);
-
-            if (!string.IsNullOrEmpty(settings.Config.ExportFilename)) {
+            
+            if (!string.IsNullOrEmpty(settings.Config.ExportFilename)) 
+            {
                 ReportProgress($"Beginning the export - SourceEnvironment: {settings.Config.SourceEnvironment}, ExportFilename:{settings.Config.ExportFilename}");
                 var exporter = new Exporter(settings);
                 exporter.Export();
             }
 
             // if ImportFile is not null, then perform the import
-            if (!string.IsNullOrEmpty(settings.Config.ImportFilename)) {
+            if (!string.IsNullOrEmpty(settings.Config.ImportFilename)) 
+            {
+
                 ReportProgress($"Beginning the Import - TargetEnvironment: {settings.Config.TargetEnvironment}, ImportFilename:{settings.Config.ImportFilename}");
                 var importer = new Importer(settings);
                 importer.Import();
+
             }
 
             // output the log file

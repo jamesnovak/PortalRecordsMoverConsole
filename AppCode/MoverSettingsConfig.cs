@@ -56,20 +56,30 @@ namespace PortalRecordsMover.AppCode
         [JsonProperty("TargetEnvironment", Required = Required.Default)]
         public string TargetEnvironment { get; set; }
 
+        [JsonProperty("SourceUsername", Required = Required.Default)]
+        public string SourceUsername { get; set; }
 
-        [JsonProperty("Username", Required = Required.Always)]
-        public string Username { get; set; }
+        [JsonProperty("SourcePassword", Required = Required.Default)]
+        public string SourcePassword { get; set; }
 
-        [JsonProperty("Password", Required = Required.Always)]
-        public string Password { get; set; }
+        [JsonProperty("TargetUsername", Required = Required.Default)]
+        public string TargetUsername { get; set; }
 
-
-        [JsonProperty("BatchCount", Required = Required.Always)]
-        [JsonConverter(typeof(ParseStringConverter))]
-        public long BatchCount { get; set; }
+        [JsonProperty("TargetPassword", Required = Required.Default)]
+        public string TargetPassword { get; set; }
 
         [JsonProperty("SelectedEntities", Required = Required.Default)]
         public List<string> SelectedEntities { get; set; }
+
+        [JsonProperty("CleanWebFiles", Required = Required.Default)]
+        public bool CleanWebFiles { get; internal set; } = true;
+
+        [JsonProperty("DeactivateWebPagePlugins", Required = Required.Default)]
+        public bool DeactivateWebPagePlugins { get; set; } = true;
+
+        [JsonProperty("RemoveJavaScriptFileRestriction", Required = Required.Default)]
+        public bool RemoveJavaScriptFileRestriction { get; internal set; } = true;
+
     }
 
     /// <summary>

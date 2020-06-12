@@ -35,9 +35,40 @@ namespace PortalRecordsMover.AppCode
 
             EntityCollection entities;
 
+            var pManager = new PluginManager(Service);
+            var nManager = new NoteManager(Service);
+
+            if (Settings.Config.DeactivateWebPagePlugins)
+            {
+                PortalMover.ReportProgress($"Deactivating Webpage plugins steps");
+                pManager.DeactivateWebpagePlugins();
+                PortalMover.ReportProgress($"Webpage plugins steps deactivated");
+            }
+
+            if (Settings.Config.RemoveJavaScriptFileRestriction && nManager.HasJsRestriction)
+            {
+                PortalMover.ReportProgress($"Removing JavaScript file restriction");
+                nManager.RemoveRestriction();
+                PortalMover.ReportProgress($"JavaScript file restriction removed");
+            }
+
             InitializeRecordsForImport();
 
             DoImport();
+
+            if (Settings.Config.DeactivateWebPagePlugins)
+            {
+                PortalMover.ReportProgress($"Reactivating Webpage plugins steps");
+                pManager.ActivateWebpagePlugins();
+                PortalMover.ReportProgress($"Webpage plugins steps activated");
+            }
+
+            if (Settings.Config.RemoveJavaScriptFileRestriction && nManager.HasJsRestriction)
+            {
+                PortalMover.ReportProgress($"Adding back JavaScript file restriction");
+                nManager.AddRestriction();
+                PortalMover.ReportProgress($"JavaScript file restriction added back");
+            }
 
             void InitializeRecordsForImport() {
 
@@ -86,7 +117,7 @@ namespace PortalRecordsMover.AppCode
 
                 PortalMover.ReportProgress("Processing records for import");
 
-                var rm = new RecordManager(Service);
+                var rm = new RecordManager(Service, Settings);
 
                 rm.ProcessRecords(entities, Settings.AllEntities);
             };

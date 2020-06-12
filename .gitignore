@@ -2,3 +2,6 @@ bin/
 obj/
 packages/
 .vs/
+exportonly.settings.json
+portal_records_mover.xml
+PortalRecordsMover.csproj.user

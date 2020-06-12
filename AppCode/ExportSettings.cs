@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Serialization;
-using Microsoft.Xrm.Sdk.Metadata;
 using System.Text;
 using System.IO;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
+using Microsoft.Xrm.Sdk.Metadata;
 
 namespace PortalRecordsMover.AppCode
 {
@@ -26,14 +22,21 @@ namespace PortalRecordsMover.AppCode
         public MoverSettingsConfig Config { get => config; set => config = value; }
 
         public string SourceConnectionString {
-            get { return $"RequireNewInstance=True;AuthType=Office365;Username={config.Username}; Password={config.Password};Url={config.SourceEnvironment}"; }
+            get { return $"RequireNewInstance=True;AuthType=Office365;Username={config.SourceUsername}; Password={config.SourcePassword};Url={config.SourceEnvironment}"; }
         }
         public string TargetConnectionString {
-            get { return $"RequireNewInstance=True;AuthType=Office365;Username={config.Username}; Password={config.Password};Url={config.TargetEnvironment}"; }
+            get { return $"RequireNewInstance=True;AuthType=Office365;Username={config.TargetUsername}; Password={config.TargetPassword};Url={config.TargetEnvironment}"; }
         }
 
         public List<EntityMetadata> Entities {
-            get { return AllEntities.Where(e => config.SelectedEntities.Contains(e.LogicalName)).ToList(); }
+            get {
+                if (config.SelectedEntities?.Count > 0) {
+                    return AllEntities.Where(e => config.SelectedEntities.Contains(e.LogicalName)).ToList();
+                }
+                else {
+                    return AllEntities; 
+                }
+            }
         }
 
         public List<EntityMetadata> AllEntities { get; set; }
@@ -52,13 +55,14 @@ namespace PortalRecordsMover.AppCode
                 .AppendLine($"CreateFilter: {config.CreateFilter}")
                 .AppendLine($"ModifyFilter: {config.ModifyFilter}")
                 .AppendLine($"DateFilterOptions: {config.DateFilterOptions}")
-                .AppendLine($"BatchCount: {config.BatchCount}")
                 .AppendLine($"WebsiteFilter: {config.WebsiteFilter}")
                 .AppendLine($"ImportFilename: {config.ImportFilename}")
                 .AppendLine($"ExportFilename: {config.ExportFilename}")
                 .AppendLine($"PriorDaysToRetrieve: {config.PriorDaysToRetrieve}")
-                .AppendLine($"Username: {config.Username}")
-                .AppendLine($"Password: {config.Password}")
+                .AppendLine($"SourceUsername: {config.SourceUsername}")
+                .AppendLine($"SourcePassword: {config.SourcePassword}")
+                .AppendLine($"TargetUsername: {config.TargetUsername}")
+                .AppendLine($"TargetPassword: {config.TargetPassword}")
                 .AppendLine($"SourceEnvironment: {config.SourceEnvironment}")
                 .AppendLine($"SourceConnectionString: {SourceConnectionString}")
                 .AppendLine($"TargetEnvironment: {config.TargetEnvironment}")
@@ -170,13 +174,6 @@ namespace PortalRecordsMover.AppCode
                         settings.Config.SourceEnvironment = arg.Value;
                         break;
 
-                    case "batchcount":
-                        settings.Config.BatchCount = 10;
-                        if (int.TryParse(arg.Value, out var bc)) {
-                            settings.Config.BatchCount = bc;
-                        }
-                        break;
-
                     case "datefilteroptions":
                         settings.Config.DateFilterOptions = DateFilterOptionsEnum.CreateAndModify;
                         if (Enum.TryParse<DateFilterOptionsEnum>(arg.Value, out DateFilterOptionsEnum df)) {
@@ -189,10 +186,6 @@ namespace PortalRecordsMover.AppCode
                 }
             }
 
-            // defaults~
-            if (settings.Config.BatchCount == 0) {
-                settings.Config.BatchCount = 10;
-            }
             if (settings.Config.DateFilterOptions == 0) {
                 settings.Config.DateFilterOptions = DateFilterOptionsEnum.CreateAndModify;
             }
@@ -241,10 +234,21 @@ namespace PortalRecordsMover.AppCode
                 throw new ArgumentNullException("SourceEnvironment must be specified if ExportFilename is specified");
             }
 
-            if (string.IsNullOrEmpty(settings.Config.Username) || string.IsNullOrEmpty(settings.Config.Password)) {
-                throw new ArgumentNullException("User name and password must be specified");
+            if (!string.IsNullOrEmpty(settings.Config.ExportFilename))
+            {
+                if (string.IsNullOrEmpty(settings.Config.SourceUsername) || string.IsNullOrEmpty(settings.Config.SourcePassword))
+                {
+                    throw new ArgumentNullException("Source User name and password must be specified for Export");
+                }
             }
 
+            if (!string.IsNullOrEmpty(settings.Config.ImportFilename))
+            {
+                if (string.IsNullOrEmpty(settings.Config.TargetUsername) || string.IsNullOrEmpty(settings.Config.TargetPassword))
+                {
+                    throw new ArgumentNullException("Target User name and password must be specified for Import");
+                }
+            }
             // update the import/export file name with the date, if the mask is present
             if (!string.IsNullOrEmpty(settings.Config.ExportFilename)) {
                 settings.Config.ExportFilename = string.Format(settings.Config.ExportFilename, now);

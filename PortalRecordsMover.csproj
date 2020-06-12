@@ -93,6 +93,8 @@
     <Compile Include="AppCode\ImportProgress.cs" />
     <Compile Include="AppCode\MetadataManager.cs" />
     <Compile Include="AppCode\MoverSettingsConfig.cs" />
+    <Compile Include="AppCode\NoteManager.cs" />
+    <Compile Include="AppCode\PluginManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AppCode\RecordManager.cs" />
@@ -103,6 +105,9 @@
     </None>
     <None Include="ExportSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="exportonly.settings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
     <None Include="portal_mover.cmd">

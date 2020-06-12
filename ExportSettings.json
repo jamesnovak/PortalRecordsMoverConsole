@@ -1,14 +1,14 @@
 {
   "ActiveItemsOnly": true,
-  "CreateFilter": "2017-11-24T12:00:00",
-  "ModifyFilter": "2017-11-24T12:00:00",
+  "CreateFilter": "2019-12-12T12:00:00",
+  "ModifyFilter": "2019-12-12T12:00:00",
 
-  "PriorDaysToRetrieve": "18",
+  "PriorDaysToRetrieve": "8",
 
   /* Enum values, either number or name will work: CreateOnly=1, ModifyOnly, CreateAndModify
   */
-  "DateFilterOptions": "CreateAndModify",
-  "WebsiteFilter": "be03bb66-e778-49ee-9663-d6db99b72d96",
+  "DateFilterOptions": "ModifyOnly",
+  "WebsiteFilter": "source website id",
 
   /*
     you can specify a date format mask here and the current date time will be added. 
@@ -17,47 +17,28 @@
   "ExportFilename": "portal export {0:yyyy-MM-dd}.xml",
   "ImportFilename": "portal export {0:yyyy-MM-dd}.xml",
 
-  "SourceEnvironment": "dev",
-  "TargetEnvironment": "test",
-  "Username": "user",
-  "Password": "pass",
+  "SourceEnvironment": "https://sourcetenant.crm.dynamics.com",
+  "SourceUsername": "admin@sourcetenant.onmicrosoft.com",
+  "SourcePassword": "password",
 
-  "BatchCount": "10",
+  "TargetEnvironment": "https://targettenant.crm.dynamics.com",
+  "TargetUsername": "admin@targettenant.onmicrosoft.com",
+  "TargetPassword": "password",
   "WebsiteIdMapping": [
     {
-      "SourceId": "be03bb66-e778-49ee-9663-d6db99b72d96",
-      "TargetId": "be03bb66-e778-49ee-9663-d6db99b72d96"
+      "SourceId": "source website id",
+      "TargetId": "target website id"
     }
   ],
-  "SelectedEntities": [
-    "adx_autonumberingdefinition",
-    "adx_contentsnippet",
-    "adx_entityform",
-    "adx_entityformmetadata",
-    "adx_entitylist",
-    "adx_entitypermission",
-    "adx_licensekey",
-    "adx_pagetemplate",
-    "adx_publishingstate",
-    "adx_setting",
-    "adx_shortcut",
-    "adx_sitemarker",
-    "adx_sitesetting",
-    "adx_webform",
-    "adx_webformmetadata",
-    "adx_webformstep",
-    "adx_weblink",
-    "adx_weblinkset",
-    "adx_webnotificationentity",
-    "adx_webnotificationurl",
-    "adx_webpage",
-    "adx_webpageaccesscontrolrule",
-    "adx_webrole",
-    "adx_website",
-    "adx_websiteaccess",
-    "adx_websitebinding",
-    "adx_webtemplate",
-    "adx_webfile"
-  ]
+  /* Deactivate plugins before import, reactivate on completion */
+  "DeactivateWebPagePlugins": true,
 
+  /* Remove JS restriction in system settings */
+  "RemoveJavaScriptFileRestriction": true,
+  /*
+    Clean target organization annotation for web file so that only the annotation you import is kept in the web file
+  */
+  "CleanWebFiles": true,
+  /* List of adx_ entity schema names that should be moved.  if empty, all will be moved */
+  "SelectedEntities": []
 }

@@ -11,8 +11,10 @@ namespace PortalRecordsMover.AppCode
     {
         public static List<EntityMetadata> GetEntitiesList(IOrganizationService service, List<string> logicalNames = null)
         {
-            EntityQueryExpression entityQueryExpressionFull = new EntityQueryExpression {
-                Properties = new MetadataPropertiesExpression {
+            EntityQueryExpression entityQueryExpressionFull = new EntityQueryExpression
+            {
+                Properties = new MetadataPropertiesExpression
+                {
                     AllProperties = false,
                     PropertyNames =
                     {
@@ -23,19 +25,24 @@ namespace PortalRecordsMover.AppCode
                         "ManyToOneRelationships",
                         "IsIntersect",
                         "PrimaryNameAttribute",
-                        "Attributes"
+                        "Attributes",
+                        "ObjectTypeCode"
                     }
                 },
-                AttributeQuery = new AttributeQueryExpression {
-                    Properties = new MetadataPropertiesExpression {
+                AttributeQuery = new AttributeQueryExpression
+                {
+                    Properties = new MetadataPropertiesExpression
+                    {
                         AllProperties = false,
                         PropertyNames = { "IsValidForCreate", "IsValidForUpdate", "LogicalName", "Targets", "OptionSet", "DisplayName" }
                     }
                 }
             };
 
-            if (logicalNames != null) {
-                entityQueryExpressionFull.Criteria = new MetadataFilterExpression {
+            if (logicalNames != null)
+            {
+                entityQueryExpressionFull.Criteria = new MetadataFilterExpression
+                {
                     Conditions =
                     {
                         new MetadataConditionExpression("LogicalName", MetadataConditionOperator.In, logicalNames.ToArray())
@@ -43,14 +50,19 @@ namespace PortalRecordsMover.AppCode
                 };
             }
 
-            RetrieveMetadataChangesRequest request = new RetrieveMetadataChangesRequest {
+            RetrieveMetadataChangesRequest request = new RetrieveMetadataChangesRequest
+            {
                 Query = entityQueryExpressionFull,
                 ClientVersionStamp = null
             };
 
             var fullResponse = (RetrieveMetadataChangesResponse)service.Execute(request);
 
-            return fullResponse.EntityMetadata.Where(e => e.LogicalName.StartsWith("adx_") || e.LogicalName == "annotation").ToList();
+            return fullResponse
+                .EntityMetadata
+                .Where(e => e.LogicalName.StartsWith("adx_") || 
+                            e.LogicalName == "annotation")
+                .ToList();
         }
     }
 }

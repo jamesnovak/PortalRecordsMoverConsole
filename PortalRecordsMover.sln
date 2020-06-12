@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortalRecordsMover", "PortalRecordsMover.csproj", "{D2D429D2-B435-4C14-9D50-1BE87FCF9E2A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MscrmTools.PortalRecordsMover", "..\..\MscrmTools\MscrmTools.PortalRecordsMover\MscrmTools.PortalRecordsMover\MscrmTools.PortalRecordsMover.csproj", "{B530B408-D89B-4715-B6D0-4E013B2ABAB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,13 +17,15 @@ Global
 		{D2D429D2-B435-4C14-9D50-1BE87FCF9E2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2D429D2-B435-4C14-9D50-1BE87FCF9E2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2D429D2-B435-4C14-9D50-1BE87FCF9E2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B530B408-D89B-4715-B6D0-4E013B2ABAB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B530B408-D89B-4715-B6D0-4E013B2ABAB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B530B408-D89B-4715-B6D0-4E013B2ABAB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B530B408-D89B-4715-B6D0-4E013B2ABAB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {71AC9C83-E79F-4BCE-BFF1-64A7D7140126}
-	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
 	EndGlobalSection
 EndGlobal

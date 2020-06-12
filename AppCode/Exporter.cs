@@ -40,7 +40,8 @@ namespace PortalRecordsMover.AppCode
             // clean up any attributes that might not be available for import 
             void PrepareAttributes()
             {
-                foreach (var record in exportRecords.Entities) {
+                foreach (var record in exportRecords.Entities) 
+                {
                     var emd = Settings.AllEntities.First(ent => ent.LogicalName == record.LogicalName);
 
                     if (!emd.IsIntersect.Value) {
@@ -49,42 +50,61 @@ namespace PortalRecordsMover.AppCode
                             .Select(a => a.LogicalName)
                             .ToArray();
 
-                        for (int i = record.Attributes.Count - 1; i >= 0; i--) {
+                        for (int i = record.Attributes.Count - 1; i >= 0; i--) 
+                        {
                             var attr = record.Attributes.ElementAt(i);
-                            if (!validAttributes.Contains(attr.Key)) {
+                            if (!validAttributes.Contains(attr.Key)) 
+                            {
                                 // PortalMover.ReportProgress($"Export: removing attribute {attr.Key}");
                                 record.Attributes.Remove(attr);
                             }
-                            else {
+                            else 
+                            {
                                 var er = record[attr.Key] as EntityReference;
-                                if (er != null && er.LogicalName == "contact") {
+                                if (er != null && er.LogicalName == "contact") 
+                                {
                                     // PortalMover.ReportProgress($"Export: removing attribute {attr.Key}");
                                     record.Attributes.Remove(attr);
                                 }
                             }
                         }
+
+                        foreach (var va in validAttributes)
+                        {
+                            //add any null attributes to force them to update to null.
+                            if (!record.Contains(va))
+                                record[va] = null;
+                        }
                     }
                 }
             }
+            
 
             void RetrieveRecordsForExport()
             {
                 // load metadata for this environment 
                 PortalMover.ReportProgress($"Loading Metadata for current environment: {Settings.Config.SourceEnvironment}");
-                Settings.AllEntities = MetadataManager.GetEntitiesList(Service).ToList();
+                // exclude intersect records here
+                Settings.AllEntities = MetadataManager
+                    .GetEntitiesList(Service)
+                    .ToList();
 
                 // load records based on the date settings: entities list, filters, etc.
                 var results = RetrieveRecords();
 
                 // get the entity records from the retrieve records results 
-                foreach (var entity in results.Entities) {
-                    if (entity.Records.Entities.Count > 0) {
+                foreach (var entity in results.Entities) 
+                {
+                    if (entity.Records.Entities.Count > 0) 
+                    {
                         PortalMover.ReportProgress($"Export: Adding records for export - Entity: {entity.Records.EntityName}, Count:{entity.Records.Entities.Count}");
                         exportRecords.Entities.AddRange(entity.Records.Entities);
                     }
                 }
-                foreach (var entity in results.NnRecords) {
-                    if (entity.Records.Entities.Count > 0) {
+                foreach (var entity in results.NnRecords) 
+                {
+                    if (entity.Records.Entities.Count > 0) 
+                    {
                         PortalMover.ReportProgress($"Adding N:N records for export - Entity: {entity.Records.EntityName}, Count:{entity.Records.Entities.Count}");
                         exportRecords.Entities.AddRange(entity.Records.Entities);
                     }
@@ -114,15 +134,17 @@ namespace PortalRecordsMover.AppCode
             }
         }
 
-        private List<Entity> RetrieveViews(List<EntityMetadata> entities)
+        public List<Entity> RetrieveViews(List<EntityMetadata> entities)
         {
-            var query = new QueryExpression("savedquery") {
+            var query = new QueryExpression("savedquery")
+            {
                 ColumnSet = new ColumnSet("returnedtypecode", "layoutxml"),
-                Criteria = new FilterExpression {
+                Criteria = new FilterExpression
+                {
                     Conditions =
                     {
                         new ConditionExpression("isquickfindquery", ConditionOperator.Equal, true),
-                        new ConditionExpression("returnedtypecode", ConditionOperator.In, entities.Select(e=>e.LogicalName).ToArray())
+                        new ConditionExpression("returnedtypecode", ConditionOperator.In, entities.Select(e=>e.LogicalName).Cast<object>().ToArray())
                     }
                 }
             };
@@ -138,48 +160,17 @@ namespace PortalRecordsMover.AppCode
         {
             var results = new ExportResults { Settings = Settings };
             PortalMover.ReportProgress("Retrieving selected entities views layout");
-
-            results.Views = RetrieveViews(Settings.Entities);
-
-            // execute multiple!
-            var execMulti = new ExecuteMultipleRequest() {
-                Requests = new OrganizationRequestCollection(),
-                Settings = new ExecuteMultipleSettings() {
-                    ContinueOnError = true,
-                    ReturnResponses = true
-                }
-            };
-
-            var counter = 0;
-            var currList = new List<string>();
-
-            foreach (var entity in Settings.Entities) 
+            var entities = Settings.Entities.Where(m => m.IsIntersect == null || m.IsIntersect.Value == false);
+            foreach (var entity in entities)
             {
-                currList.Add($"{entity.LogicalName}: '{entity.DisplayName?.UserLocalizedLabel?.Label ?? entity.LogicalName}'");
-                execMulti.Requests.Add(GetRetieveMultipleRequest(entity, Settings));
-                ++counter;
-                // batch in tens, or until we reach the end
-                if ((currList.Count == Settings.Config.BatchCount) || (Settings.Entities.Count == counter)) {
+                PortalMover.ReportProgress($"Retrieving records for entity {entity.DisplayName?.UserLocalizedLabel?.Label ?? entity.LogicalName}...");
 
-                    PortalMover.ReportProgress($"Begin Execute Multiple Request for entity records:\n{string.Join(", ", currList.ToArray())}");
-                    var multiResults = Service.Execute(execMulti) as ExecuteMultipleResponse;
+                var er = new EntityResult
+                {
+                    Records = RetrieveRecords(entity, Settings.Config)
+                };
 
-                    // iterate on results and add to return 
-                    foreach (var result in multiResults.Responses) {
-                        // get the restrieve multiple response and make sure we have records
-                        var entities = ((RetrieveMultipleResponse)result.Response).EntityCollection;
-
-                        if (entities.Entities.Count > 0) {
-                            // PortalMover.ReportProgress($"Returned {entities.Entities.Count} records for {entities.EntityName}");
-                            var er = new EntityResult { Records = entities };
-                            results.Entities.Add(er);
-                        }
-                    }
-
-                    // now that we have retrieved these entities, clear the collection 
-                    execMulti.Requests.Clear();
-                    currList.Clear();
-                }
+                results.Entities.Add(er);
             }
 
             PortalMover.ReportProgress("Retrieving many to many relationships records.");
@@ -188,6 +179,228 @@ namespace PortalRecordsMover.AppCode
             return results;
         }
 
+        public EntityCollection RetrieveRecords(EntityMetadata emd, MoverSettingsConfig settings)
+        {
+            var query = new QueryExpression(emd.LogicalName)
+            {
+                ColumnSet = new ColumnSet(true),
+                Criteria = new FilterExpression { Filters = { new FilterExpression(LogicalOperator.Or) } }
+            };
+
+            // filter by either the created on OR the modified on 
+            var dateFilter = new FilterExpression(LogicalOperator.Or);
+
+            if (settings.CreateFilter.HasValue && !emd.IsIntersect.Value)
+            {
+                dateFilter.Filters.Add(new FilterExpression(LogicalOperator.Or));
+                dateFilter.Conditions.Add(new ConditionExpression("createdon", ConditionOperator.OnOrAfter, settings.CreateFilter.Value.ToString("yyyy-MM-dd")));
+            }
+
+            if (settings.ModifyFilter.HasValue && !emd.IsIntersect.Value)
+            {
+                dateFilter.Filters.Add(new FilterExpression(LogicalOperator.Or));
+                dateFilter.Conditions.Add(new ConditionExpression("modifiedon", ConditionOperator.OnOrAfter, settings.ModifyFilter.Value.ToString("yyyy-MM-dd")));
+            }
+
+            // add the OR date filter for createdon and modified on
+            query.Criteria.Filters.Add(dateFilter);
+
+            if (settings.WebsiteFilter != Guid.Empty)
+            {
+                var lamd = emd.Attributes.FirstOrDefault(a =>
+                    a is LookupAttributeMetadata metadata && 
+                    metadata.Targets[0] == "adx_website");
+
+                if (lamd != null)
+                {
+                    query.Criteria.AddCondition(lamd.LogicalName, ConditionOperator.Equal, settings.WebsiteFilter);
+                }
+                else
+                {
+                    switch (emd.LogicalName)
+                    {
+                        case "adx_webfile":
+                            var noteLe = new LinkEntity
+                            {
+                                LinkFromEntityName = "adx_webfile",
+                                LinkFromAttributeName = "adx_webfileid",
+                                LinkToAttributeName = "objectid",
+                                LinkToEntityName = "annotation",
+                                LinkCriteria = new FilterExpression(LogicalOperator.Or)
+                            };
+
+                            bool addLinkEntity = false;
+
+                            if (settings.CreateFilter.HasValue)
+                            {
+                                noteLe.LinkCriteria.AddCondition("createdon", ConditionOperator.OnOrAfter, settings.CreateFilter.Value.ToString("yyyy-MM-dd"));
+                                addLinkEntity = true;
+                            }
+
+                            if (settings.ModifyFilter.HasValue)
+                            {
+                                noteLe.LinkCriteria.AddCondition("modifiedon", ConditionOperator.OnOrAfter, settings.ModifyFilter.Value.ToString("yyyy-MM-dd"));
+                                addLinkEntity = true;
+                            }
+
+                            if (addLinkEntity)
+                            {
+                                query.LinkEntities.Add(noteLe);
+                            }
+                            break;
+
+                        case "adx_entityformmetadata":
+                            query.LinkEntities.Add(
+                                CreateParentEntityLinkToWebsite(
+                                    emd.LogicalName,
+                                    "adx_entityform",
+                                    "adx_entityformid",
+                                    "adx_entityform",
+                                    settings.WebsiteFilter));
+                            break;
+
+                        case "adx_webformmetadata":
+                            var le = CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_webformstep",
+                                "adx_webformstepid",
+                                "adx_webformstep",
+                                Guid.Empty);
+
+                            le.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                "adx_webformstep",
+                                "adx_webform",
+                                "adx_webformid",
+                                "adx_webform",
+                                settings.WebsiteFilter));
+
+                            query.LinkEntities.Add(le);
+                            break;
+
+                        case "adx_weblink":
+                            query.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_weblinksetid",
+                                "adx_weblinksetid",
+                                "adx_weblinkset",
+                                settings.WebsiteFilter));
+                            break;
+
+                        case "adx_blogpost":
+                            query.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_blogid",
+                                "adx_blogid",
+                                "adx_blog",
+                                settings.WebsiteFilter));
+                            break;
+
+                        case "adx_communityforumaccesspermission":
+                        case "adx_communityforumannouncement":
+                        case "adx_communityforumthread":
+                            query.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_forumid",
+                                "adx_communityforumid",
+                                "adx_communityforum",
+                                settings.WebsiteFilter));
+                            break;
+
+                        case "adx_communityforumpost":
+                            var lef = CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_forumthreadid",
+                                "adx_communityforumthreadid",
+                                "adx_communityforumthread",
+                                Guid.Empty);
+
+                            lef.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                "adx_communityforumthread",
+                                "adx_forumid",
+                                "adx_communityforumid",
+                                "adx_communityforum",
+                                settings.WebsiteFilter));
+
+                            query.LinkEntities.Add(lef);
+
+                            break;
+
+                        case "adx_idea":
+                            query.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_ideaforumid",
+                                "adx_ideaforumid",
+                                "adx_ideaforum",
+                                settings.WebsiteFilter));
+                            break;
+
+                        case "adx_pagealert":
+                        case "adx_webpagehistory":
+                        case "adx_webpagelog":
+                            query.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_webpageid",
+                                "adx_webpageid",
+                                "adx_webpage",
+                                settings.WebsiteFilter));
+                            break;
+
+                        case "adx_pollsubmission":
+                            query.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_pollid",
+                                "adx_pollid",
+                                "adx_poll",
+                                settings.WebsiteFilter));
+                            break;
+
+                        case "adx_webfilelog":
+                            query.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_webfileid",
+                                "adx_webfileid",
+                                "adx_webfile",
+                                settings.WebsiteFilter));
+                            break;
+
+                        case "adx_webformsession":
+                        case "adx_webformstep":
+                            query.LinkEntities.Add(CreateParentEntityLinkToWebsite(
+                                emd.LogicalName,
+                                "adx_webform",
+                                "adx_webformid",
+                                "adx_webform",
+                                settings.WebsiteFilter));
+                            break;
+                    }
+                }
+            }
+
+            if (settings.ActiveItemsOnly && emd.LogicalName != "annotation")
+            {
+                query.Criteria.AddCondition("statecode", ConditionOperator.Equal, 0);
+            }
+
+            return Service.RetrieveMultiple(query);
+        }
+
+        private LinkEntity CreateParentEntityLinkToWebsite(string fromEntity, string fromAttribute, string toAttribute, string toEntity, Guid websiteId)
+        {
+            var le = new LinkEntity
+            {
+                LinkFromEntityName = fromEntity,
+                LinkFromAttributeName = fromAttribute,
+                LinkToAttributeName = toAttribute,
+                LinkToEntityName = toEntity,
+            };
+
+            if (websiteId != Guid.Empty)
+            {
+                le.LinkCriteria.AddCondition("adx_websiteid", ConditionOperator.Equal, websiteId);
+            }
+
+            return le;
+        }
         /// <summary>
         /// Retrieve related records for the selected Entity
         /// </summary>
@@ -251,16 +464,20 @@ namespace PortalRecordsMover.AppCode
         private List<Entity> RetrieveWebfileAnnotations(List<Guid> ids)
         {
             PortalMover.ReportProgress($"Retrieving Web File Annotations for {ids.Count} records");
-            return Service.RetrieveMultiple(new QueryExpression("annotation") {
+            return Service.RetrieveMultiple(new QueryExpression("annotation") 
+            {
                 ColumnSet = new ColumnSet(true),
-                Criteria = new FilterExpression {
-                    Conditions = { new ConditionExpression("objectid", ConditionOperator.In, ids.ToArray()) }
+                Criteria = new FilterExpression 
+                {
+                    Conditions = { 
+                        new ConditionExpression("objectid", ConditionOperator.In, ids.ToArray()) 
+                    }
                 }
             }).Entities.ToList();
         }
 
         /// <summary>
-        /// 
+        /// Retrieve records for the N:N relations
         /// </summary>
         /// <param name="settings"></param>
         /// <param name="records"></param>
@@ -270,8 +487,10 @@ namespace PortalRecordsMover.AppCode
             var ers = new List<EntityResult>();
             var rels = new List<ManyToManyRelationshipMetadata>();
 
-            foreach (var emd in settings.Entities) {
-                foreach (var mm in emd.ManyToManyRelationships) {
+            foreach (var emd in settings.Entities) 
+            {
+                foreach (var mm in emd.ManyToManyRelationships) 
+                {
                     var e1 = mm.Entity1LogicalName;
                     var e2 = mm.Entity2LogicalName;
                     var isValid = false;
@@ -293,21 +512,27 @@ namespace PortalRecordsMover.AppCode
                 }
             }
 
-            var execMulti = new ExecuteMultipleRequest() {
+            var execMulti = new ExecuteMultipleRequest() 
+            {
                 Requests = new OrganizationRequestCollection(),
-                Settings = new ExecuteMultipleSettings() {
+                Settings = new ExecuteMultipleSettings() 
+                {
                     ContinueOnError = true,
                     ReturnResponses = true
                 }
             };
 
             foreach (var mm in rels) {
-                var ids = records.Where(r => r.LogicalName == mm.Entity1LogicalName).Select(r => r.Id).ToList();
+                var ids = records.Where(r => r.LogicalName == mm.Entity1LogicalName)
+                    .Select(r => r.Id)
+                    .ToList();
+
                 if (!ids.Any()) {
                     continue;
                 }
 
-                var query = new QueryExpression(mm.IntersectEntityName) {
+                var query = new QueryExpression(mm.IntersectEntityName) 
+                {
                     ColumnSet = new ColumnSet(true),
                     Criteria = new FilterExpression {
                         Conditions = {
@@ -321,7 +546,8 @@ namespace PortalRecordsMover.AppCode
             var multiResults = Service.Execute(execMulti) as ExecuteMultipleResponse;
 
             // iterate on results and add to return 
-            foreach (var result in multiResults.Responses) {
+            foreach (var result in multiResults.Responses) 
+            {
                 // get the restrieve multiple response and make sure we have records
                 var entities = ((RetrieveMultipleResponse)result.Response).EntityCollection;
                 if (entities.Entities.Count > 0) {
