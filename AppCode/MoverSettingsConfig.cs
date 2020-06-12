@@ -4,22 +4,24 @@
 //
 //    var moverSettings = MoverSettings.FromJson(jsonString);
 
+using System;
+using System.Collections.Generic;
+
+using System.Globalization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
 namespace PortalRecordsMover.AppCode
 {
-    using System;
-    using System.Collections.Generic;
-
-    using System.Globalization;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
-
     public enum DateFilterOptionsEnum
     {
         CreateOnly = 1,
         ModifyOnly,
         CreateAndModify
     }
-
+    /// <summary>
+    /// Config settings for the export/import
+    /// </summary>
     public partial class MoverSettingsConfig
     {
         [JsonProperty("ActiveItemsOnly", Required = Required.Always)]
@@ -114,7 +116,9 @@ namespace PortalRecordsMover.AppCode
             },
         };
     }
-
+    /// <summary>
+    /// Class that will help serialize a JSON string
+    /// </summary>
     internal class ParseStringConverter : JsonConverter
     {
         public override bool CanConvert(Type t) => t == typeof(long) || t == typeof(long?) || t==typeof(DateFilterOptionsEnum);

@@ -41,4 +41,35 @@
   "CleanWebFiles": true,
   /* List of adx_ entity schema names that should be moved.  if empty, all will be moved */
   "SelectedEntities": []
+  /* example filter:
+  "SelectedEntities": [
+    "adx_autonumberingdefinition",
+    "adx_contentsnippet",
+    "adx_entityform",
+    "adx_entityformmetadata",
+    "adx_entitylist",
+    "adx_entitypermission",
+    "adx_licensekey",
+    "adx_pagetemplate",
+    "adx_publishingstate",
+    "adx_setting",
+    "adx_shortcut",
+    "adx_sitemarker",
+    "adx_sitesetting",
+    "adx_webform",
+    "adx_webformmetadata",
+    "adx_webformstep",
+    "adx_weblink",
+    "adx_weblinkset",
+    "adx_webnotificationentity",
+    "adx_webnotificationurl",
+    "adx_webpage",
+    "adx_webpageaccesscontrolrule",
+    "adx_webrole",
+    "adx_website",
+    "adx_websiteaccess",
+    "adx_websitebinding",
+    "adx_webtemplate",
+    "adx_webfile"
+  ] */
 }

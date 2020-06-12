@@ -8,6 +8,9 @@ using Microsoft.Xrm.Sdk.Metadata;
 
 namespace PortalRecordsMover.AppCode
 {
+    /// <summary>
+    /// General export settings class
+    /// </summary>
     public class ExportSettings
     {
         public ExportSettings()
@@ -27,10 +30,14 @@ namespace PortalRecordsMover.AppCode
         public string TargetConnectionString {
             get { return $"RequireNewInstance=True;AuthType=Office365;Username={config.TargetUsername}; Password={config.TargetPassword};Url={config.TargetEnvironment}"; }
         }
-
+        /// <summary>
+        /// List of EntityMetadata objects for items being processed
+        /// </summary>
         public List<EntityMetadata> Entities {
-            get {
-                if (config.SelectedEntities?.Count > 0) {
+            get 
+            {
+                if (config.SelectedEntities?.Count > 0) 
+                {
                     return AllEntities.Where(e => config.SelectedEntities.Contains(e.LogicalName)).ToList();
                 }
                 else {
@@ -60,9 +67,9 @@ namespace PortalRecordsMover.AppCode
                 .AppendLine($"ExportFilename: {config.ExportFilename}")
                 .AppendLine($"PriorDaysToRetrieve: {config.PriorDaysToRetrieve}")
                 .AppendLine($"SourceUsername: {config.SourceUsername}")
-                .AppendLine($"SourcePassword: {config.SourcePassword}")
+                // .AppendLine($"SourcePassword: {config.SourcePassword}")
                 .AppendLine($"TargetUsername: {config.TargetUsername}")
-                .AppendLine($"TargetPassword: {config.TargetPassword}")
+                // .AppendLine($"TargetPassword: {config.TargetPassword}")
                 .AppendLine($"SourceEnvironment: {config.SourceEnvironment}")
                 .AppendLine($"SourceConnectionString: {SourceConnectionString}")
                 .AppendLine($"TargetEnvironment: {config.TargetEnvironment}")
