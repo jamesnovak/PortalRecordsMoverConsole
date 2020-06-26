@@ -7,11 +7,10 @@ This project is console application version of the  MscrmTools.PortalRecordsMov
 
 This is intended to be integrated into a DevOps solution for automated build and deployment.
 
-Please refer to the sample portal_mover.cmd for a list of avaialable params.  They are summarized below: 
+Please refer to the sample portal_mover.cmd for a list of avaialable params. They are summarized below: 
 
 ## Command Line Options
-* /settings:	Name of the settings file to be loaded.  See the ExportSettings.json for an example.
-				An empty settings argument will mean that only command line arguments will be used
+* **/settings:**	Name of the settings file to be loaded.  See the ExportSettings.json for an example.  An empty /settings: argument will mean that only command line arguments will be used
 
 The following command line parameter values will override any value specified in the settings JSON file.  Passing in only the argument will null out any value found in the settings file
 
@@ -35,11 +34,15 @@ The following command line parameter values will override any value specified in
 * **/sourceenv:**	Full URL of the environment from which records are retreieved. Ex. Ex. https://microsoft.crm.dynamics.com
 * **/exportfile:**	Filename to which records will be saved post export. Can use a mask for date/time: portal export {0:yyyy-MM-dd}.xml
 
-* **/user:**  Username
-* **/pass:**  password
+* **/sourceuser:**  Username for the Source environment
+* **/sourcepass:**  Password for the Source environment
 
-Example: export only, even if target and import values are present in the configuration
-* PortalRecordsMover /priordays:5 /activeonly:true /sourceenv:my-dev /targetenv: /importfile:
+* **/targetuser:**  Username
+* **/targetpass:**  Password for the Target environment
+
+Example: export only, using command line parameters and a config file
+* PortalRecordsMover /priordays:5 /activeonly:true /sourceenv:https://my-dev.crm.dynamics.com
 * PortalRecordsMover /priordays:5 /settings:exportonly.settings.json
 
-
+Example: export and import, using command line parameters.  Export and import are the same, so this is a move from dev to test
+* PortalRecordsMover /priordays:5 /activeonly:true /sourceenv:https://my-dev.crm.dynamics.com /targetenv:https://my-test.crm.dynamics.com /exportfile:portal-move{0:yyyy-MM-dd}.xml /importfile:portal-move{0:yyyy-MM-dd}.xml

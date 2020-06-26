@@ -109,7 +109,7 @@ namespace PortalRecordsMover.AppCode
                 settings.SettingsFileName = argsDict["settings"];
             }
 
-            // load the settings file
+            // load the settings file first... then override values from the command line parameters
             if (File.Exists(settings.SettingsFileName)) {
                 using (TextReader txtReader = new StreamReader(settings.SettingsFileName)) 
                 {
@@ -125,28 +125,27 @@ namespace PortalRecordsMover.AppCode
             // TODO error handling, throw exception on required elements, validation, etc
             foreach (var arg in argsDict)
             {
-                DateTime dt;
                 switch (arg.Key)
                 {
                     case "createdon":
-                        if (DateTime.TryParse(arg.Value, out dt)) {
-                            settings.Config.CreateFilter = dt;
+                        if (DateTime.TryParse(arg.Value, out var created)) {
+                            settings.Config.CreateFilter = created;
                         }
                         else {
                             settings.Config.CreateFilter = null;
                         }
                         break;
                     case "modifiedon":
-                        if (DateTime.TryParse(arg.Value, out dt)) {
-                            settings.Config.ModifyFilter = dt;
+                        if (DateTime.TryParse(arg.Value, out var mod)) {
+                            settings.Config.ModifyFilter = mod;
                         }
                         else {
                             settings.Config.ModifyFilter = null;
                         }
                         break;
                     case "activeonly":
-                        if (bool.TryParse(arg.Value, out var b)) {
-                            settings.Config.ActiveItemsOnly = b;
+                        if (bool.TryParse(arg.Value, out var act)) {
+                            settings.Config.ActiveItemsOnly = act;
                         }
                         break;
                     case "website":
@@ -161,24 +160,33 @@ namespace PortalRecordsMover.AppCode
                         settings.Config.ImportFilename = arg.Value;
                         break;
                     case "priordays":
-                        if (int.TryParse(arg.Value, out var i)) {
-                            settings.Config.PriorDaysToRetrieve = i;
+                        if (int.TryParse(arg.Value, out var days)) {
+                            settings.Config.PriorDaysToRetrieve = days;
                         }
                         else {
                             settings.Config.PriorDaysToRetrieve = null;
                         }
                         break;
-                    case "targetenv":
-                        settings.Config.TargetEnvironment = arg.Value;
-                        break;
+                    // SOURCE
                     case "sourceenv":
                         settings.Config.SourceEnvironment = arg.Value;
                         break;
-                    case "user":
-                        settings.Config.SourceEnvironment = arg.Value;
+                    case "sourceuser":
+                        settings.Config.SourceUsername = arg.Value;
                         break;
-                    case "pass":
-                        settings.Config.SourceEnvironment = arg.Value;
+                    case "sourcepass":
+                        settings.Config.SourcePassword = arg.Value;
+                        break;
+
+                    // TARGET
+                    case "targetenv":
+                        settings.Config.TargetEnvironment = arg.Value;
+                        break;
+                    case "targetuser":
+                        settings.Config.TargetUsername = arg.Value;
+                        break;
+                    case "targetpass":
+                        settings.Config.TargetPassword = arg.Value;
                         break;
 
                     case "datefilteroptions":
@@ -187,7 +195,21 @@ namespace PortalRecordsMover.AppCode
                             settings.Config.DateFilterOptions = df;
                         }
                         break;
-
+                    case "cleanweb":
+                        if (bool.TryParse(arg.Value, out var web)) {
+                            settings.Config.CleanWebFiles = web;
+                        }
+                        break;
+                    case "disableplugins":
+                        if (bool.TryParse(arg.Value, out var plug)) {
+                            settings.Config.DeactivateWebPagePlugins = plug;
+                        }
+                        break;
+                    case "removejsrestriction":
+                        if (bool.TryParse(arg.Value, out var js)) {
+                            settings.Config.RemoveJavaScriptFileRestriction = js;
+                        }
+                        break;
                     default:
                         break;
                 }
