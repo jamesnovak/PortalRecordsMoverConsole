@@ -22,12 +22,19 @@
 :: /sourceenv:	Full URL of the environment from which records are retreieved. Ex. Ex. https://microsoft.crm.dynamics.com
 :: /exportfile:	Filename to which records will be saved post export. Can use a mask for date/time: portal export {0:yyyy-MM-dd}.xml
 
-:: /user:  Username
-:: /pass:  password
+:: /sourceuser:**  Username for the Source environment
+:: /sourcepass:**  Password for the Source environment
 
-:: passing in only the argument will null out any value found in the settings file.
-:: passing in an empty settings argument will mean that only command line arguments will be used
+:: /targetuser:**  Username for the Target environment
+:: /targetpass:**  Password for the Target environment
+
+:: If the /exportfile: or /importfile: are not specifed, the related action will not occur
+
+:: Passing in only the argument will null out any value found in the settings file.
+:: Passing in an empty settings argument will mean that only command line arguments will be used
 
 :: example: export only, even if target and import values are present in the configuration
-:: PortalRecordsMover /priordays:5 /activeonly:true /sourceenv:opj-dev /targetenv: /importfile:  
+:: PortalRecordsMover /priordays:5 /activeonly:true /sourceenv:https://contoso-dev.crm.dynamics.com /exportfile:export_{0:yyyy-MM-dd}.xml /targetenv: /importfile:  
+
+:: example: configuration file only, but override the number of prior days
 :: PortalRecordsMover /priordays:5 /settings:PortalRecordsMover.exportonly.settings.xml 
