@@ -31,13 +31,13 @@ The following command line parameter values will override any value specified in
 * **/targetenv:**	Full URL of the environment to which records are imported.  Ex. https://contoso.crm.dynamics.com
 * **/importfile:**	Filename from which records will be read for import. Can use a mask for date/time: portal export {0:yyyy-MM-dd}.xml
 
-* **/sourceenv:**	Full URL of the environment from which records are retreieved. Ex. Ex. https://microsoft.crm.dynamics.com
+* **/sourceenv:**	Full URL of the environment from which records are retreieved. Ex. https://microsoft.crm.dynamics.com
 * **/exportfile:**	Filename to which records will be saved post export. Can use a mask for date/time: portal export {0:yyyy-MM-dd}.xml
 
 * **/sourceuser:**  Username for the Source environment
 * **/sourcepass:**  Password for the Source environment
 
-* **/targetuser:**  Username
+* **/targetuser:**  Username for the Target environment
 * **/targetpass:**  Password for the Target environment
 
 Example: export only, using command line parameters and a config file
