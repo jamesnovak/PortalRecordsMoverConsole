@@ -214,12 +214,6 @@ namespace PortalRecordsMover.AppCode
                             settings.Config.RemoveJavaScriptFileRestriction = js;
                         }
                         break;
-                    case "removeformattedvalues":
-                        if (bool.TryParse(arg.Value, out var rfv))
-                        {
-                            settings.Config.RemoveFormattedValues = rfv;
-                        }
-                        break;
                     case "exportinfolderstructure":
                         if (bool.TryParse(arg.Value, out var efs))
                         {
