@@ -36,8 +36,15 @@ namespace PortalRecordsMover.AppCode
             RetrieveRecordsForExport();
 
             PrepareAttributes();
-            
-            SaveToFile();
+
+            if (Settings.Config.ExportInFolderStructure)
+            {
+                ExportToFolderStructure(exportRecords);
+            }
+            else
+            {
+                SaveToFile();
+            }
 
             // clean up any attributes that might not be available for import 
             void PrepareAttributes()
@@ -126,13 +133,6 @@ namespace PortalRecordsMover.AppCode
             }
             void SaveToFile()
             {
-                if (Settings.Config.ExportInFolderStructure)
-                {
-                    ExportToFolderStructure(exportRecords);
-                    return;
-                }
-
-
                 var xwSettings = new XmlWriterSettings { Indent = true };
                 var serializer = new DataContractSerializer(typeof(EntityCollection), new List<Type> { typeof(Entity) });
 

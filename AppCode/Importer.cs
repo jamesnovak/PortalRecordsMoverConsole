@@ -29,14 +29,7 @@ namespace PortalRecordsMover.AppCode
 
         public void Import()
         {
-            if(Directory.Exists(Settings.Config.ImportFilename))
-                throw new ApplicationException($"FOLDER IMPORT NOT IMPLEMENTED!");
-
-            if (!File.Exists(Settings.Config.ImportFilename)) {
-                throw new ApplicationException($"The file {Settings.Config.ImportFilename} does not exist!");
-            }
-
-            EntityCollection entities;
+            EntityCollection entities = FileManager.GetRecordsFromDisk(Settings.Config.ImportFilename);
 
             var pManager = new PluginManager(Service);
             var nManager = new NoteManager(Service);
@@ -75,13 +68,15 @@ namespace PortalRecordsMover.AppCode
 
             void InitializeRecordsForImport() {
 
+                // NB xml deserialization now performed in to FileManager.DeserializeFullPath()
+
                 // load the file from disk, deserialize 
-                PortalMover.ReportProgress($"Deserializing ImportFileName: {Settings.Config.ImportFilename}");
-                using (var reader = new StreamReader(Settings.Config.ImportFilename))
-                {
-                    var serializer = new DataContractSerializer(typeof(EntityCollection), new List<Type> { typeof(Entity) });
-                    entities = (EntityCollection)serializer.ReadObject(reader.BaseStream);
-                }
+                //PortalMover.ReportProgress($"Deserializing ImportFileName: {Settings.Config.ImportFilename}");
+                //using (var reader = new StreamReader(Settings.Config.ImportFilename))
+                //{
+                //    var serializer = new DataContractSerializer(typeof(EntityCollection), new List<Type> { typeof(Entity) });
+                //    entities = (EntityCollection)serializer.ReadObject(reader.BaseStream);
+                //}
 
                 if (entities.Entities.Count == 0) {
                     throw new ApplicationException("No enitites available to import.");

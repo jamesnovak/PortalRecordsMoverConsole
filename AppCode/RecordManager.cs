@@ -202,6 +202,12 @@ namespace PortalRecordsMover.AppCode
             {
                 var entityProgress = GetEntityProgress(nextCycle, record, progress, emds);
 
+                if(entityProgress == null)
+                {
+                    PortalMover.ReportProgress($"WARNING: Many-To-Many association was skipped as entity '{record.LogicalName}' does not exist in target");
+                    continue;
+                }
+
                 if (!entityProgress.SuccessSecondPhase.HasValue)
                 {
                     entityProgress.SuccessSecondPhase = 0;
