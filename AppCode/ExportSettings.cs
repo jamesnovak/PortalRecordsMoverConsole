@@ -58,6 +58,8 @@ namespace PortalRecordsMover.AppCode
         {
             var sb = new StringBuilder();
 
+            string selectedEntitiesString = config.SelectedEntities == null ? "<UNDEFINED>" : string.Join(", ", config.SelectedEntities.ToArray());
+
             sb.AppendLine($"ActiveItemsOnly: {config.ActiveItemsOnly}")
                 .AppendLine($"CreateFilter: {config.CreateFilter}")
                 .AppendLine($"ModifyFilter: {config.ModifyFilter}")
@@ -74,7 +76,7 @@ namespace PortalRecordsMover.AppCode
                 .AppendLine($"SourceConnectionString: {SourceConnectionString}")
                 .AppendLine($"TargetEnvironment: {config.TargetEnvironment}")
                 .AppendLine($"TargetConnectionString: {TargetConnectionString}")
-                .AppendLine($"SelectedEntities:\n{string.Join(", ", config.SelectedEntities.ToArray())}");
+                .AppendLine($"SelectedEntities:\n{selectedEntitiesString}");
 
             return sb.ToString();
         }
@@ -118,7 +120,8 @@ namespace PortalRecordsMover.AppCode
                 }
             }
             else {
-                PortalMover.ReportProgress($"Unable to locate the configruation file {settings.SettingsFileName}.  Using Command Line args only.");
+                settings.Config = new MoverSettingsConfig();
+                PortalMover.ReportProgress($"Unable to locate the configuration file {settings.SettingsFileName}.  Using Command Line args only.");
             }
 
             // update settings object with override values from command line
@@ -206,8 +209,21 @@ namespace PortalRecordsMover.AppCode
                         }
                         break;
                     case "removejsrestriction":
-                        if (bool.TryParse(arg.Value, out var js)) {
+                        if (bool.TryParse(arg.Value, out var js))
+                        {
                             settings.Config.RemoveJavaScriptFileRestriction = js;
+                        }
+                        break;
+                    case "removeformattedvalues":
+                        if (bool.TryParse(arg.Value, out var rfv))
+                        {
+                            settings.Config.RemoveFormattedValues = rfv;
+                        }
+                        break;
+                    case "exportinfolderstructure":
+                        if (bool.TryParse(arg.Value, out var efs))
+                        {
+                            settings.Config.ExportInFolderStructure = efs;
                         }
                         break;
                     default:

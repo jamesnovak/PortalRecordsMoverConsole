@@ -29,6 +29,9 @@ namespace PortalRecordsMover.AppCode
 
         public void Import()
         {
+            if(Directory.Exists(Settings.Config.ImportFilename))
+                throw new ApplicationException($"FOLDER IMPORT NOT IMPLEMENTED!");
+
             if (!File.Exists(Settings.Config.ImportFilename)) {
                 throw new ApplicationException($"The file {Settings.Config.ImportFilename} does not exist!");
             }

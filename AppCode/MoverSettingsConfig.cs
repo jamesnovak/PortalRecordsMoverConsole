@@ -82,6 +82,12 @@ namespace PortalRecordsMover.AppCode
         [JsonProperty("RemoveJavaScriptFileRestriction", Required = Required.Default)]
         public bool RemoveJavaScriptFileRestriction { get; internal set; } = true;
 
+        [JsonProperty("RemoveFormattedValues", Required = Required.Default)]
+        public bool RemoveFormattedValues { get; internal set; } = false;
+
+        [JsonProperty("ExportInFolderStructure", Required = Required.Default)]
+        public bool ExportInFolderStructure { get; internal set; } = false;
+
     }
 
     /// <summary>

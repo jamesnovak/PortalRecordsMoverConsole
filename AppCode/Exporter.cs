@@ -9,6 +9,8 @@ using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Tooling.Connector;
 using Microsoft.Xrm.Sdk.Messages;
+using System.IO;
+using System.Xml.Linq;
 
 namespace PortalRecordsMover.AppCode
 {
@@ -34,7 +36,7 @@ namespace PortalRecordsMover.AppCode
             RetrieveRecordsForExport();
 
             PrepareAttributes();
-
+            
             SaveToFile();
 
             // clean up any attributes that might not be available for import 
@@ -124,6 +126,13 @@ namespace PortalRecordsMover.AppCode
             }
             void SaveToFile()
             {
+                if (Settings.Config.ExportInFolderStructure)
+                {
+                    ExportToFolderStructure(exportRecords);
+                    return;
+                }
+
+
                 var xwSettings = new XmlWriterSettings { Indent = true };
                 var serializer = new DataContractSerializer(typeof(EntityCollection), new List<Type> { typeof(Entity) });
 
@@ -132,6 +141,67 @@ namespace PortalRecordsMover.AppCode
                 }
                 PortalMover.ReportProgress($"Records exported to {Settings.Config.ExportFilename}!");
             }
+
+            void ExportToFolderStructure(EntityCollection list)
+            {
+                var rootPath = string.Format(Settings.Config.ExportFilename, DateTime.Now);
+                if (!Directory.Exists(rootPath))
+                {
+                    Directory.CreateDirectory(rootPath);
+                }
+                var entities = list.Entities.GroupBy(ent => ent.LogicalName);
+                foreach (var entity in entities)
+                {
+                    var directory = Path.Combine(rootPath, entity.Key);
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    foreach (var record in entity)
+                    {
+                        var filePath = Path.Combine(directory, $"{record.Id:B}.xml");
+                        var xwSettings = new XmlWriterSettings { Indent = true };
+                        var serializer = new DataContractSerializer(typeof(Entity));
+
+                        using (var w = XmlWriter.Create(filePath, xwSettings))
+                        {
+                            serializer.WriteObject(w, record);
+                        }
+
+                        CleanAndOrderXml(filePath);
+                    }
+                }
+            }
+
+        }
+        private void CleanAndOrderXml(string filePath)
+        {
+            var xDoc = XDocument.Load(filePath);
+            if (xDoc.Root == null) return;
+
+            XNamespace ns = xDoc.Root.GetDefaultNamespace();
+
+            // Order attributes
+            var attributesNode = xDoc.Root.Element(ns + "Attributes");
+            if (attributesNode != null)
+            {
+                var kvps = attributesNode
+                    .Elements()
+                    .OrderBy(s => ((XElement)s.FirstNode).Value)
+                    .ToList();
+
+                attributesNode.RemoveNodes();
+                attributesNode.Add(kvps);
+            }
+
+            if (false)  // Remove Formatted Values selected
+            {
+                var formattedValues = xDoc.Root.Element(ns + "FormattedValues");
+                formattedValues?.Remove();
+            }
+
+            xDoc.Save(filePath);
         }
 
         public List<Entity> RetrieveViews(List<EntityMetadata> entities)
@@ -209,6 +279,7 @@ namespace PortalRecordsMover.AppCode
             {
                 var lamd = emd.Attributes.FirstOrDefault(a =>
                     a is LookupAttributeMetadata metadata && 
+                    metadata.Targets.Length > 0 &&
                     metadata.Targets[0] == "adx_website");
 
                 if (lamd != null)
