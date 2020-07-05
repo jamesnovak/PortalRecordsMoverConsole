@@ -108,9 +108,6 @@
     <None Include="ExportSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="exportonly.settings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
     <None Include="portal_mover.cmd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
