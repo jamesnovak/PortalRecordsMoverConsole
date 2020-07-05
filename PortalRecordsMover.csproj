@@ -68,6 +68,7 @@
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
@@ -89,6 +90,7 @@
     <Compile Include="AppCode\ExportResults.cs" />
     <Compile Include="AppCode\ExportSettings.cs" />
     <Compile Include="AppCode\Extensions.cs" />
+    <Compile Include="AppCode\FileManager.cs" />
     <Compile Include="AppCode\Importer.cs" />
     <Compile Include="AppCode\ImportProgress.cs" />
     <Compile Include="AppCode\MetadataManager.cs" />
