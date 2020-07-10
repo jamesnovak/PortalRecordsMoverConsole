@@ -84,7 +84,12 @@ namespace PortalRecordsMover.AppCode
 
         [JsonProperty("ExportInFolderStructure", Required = Required.Default)]
         public bool ExportInFolderStructure { get; internal set; } = false;
+        
+        [JsonProperty("TargetAppId", Required = Required.Default)]
+        public string TargetAppId { get; set; }
 
+        [JsonProperty("TargetAppSecret", Required = Required.Default)]
+        public string TargetAppSecret { get; set; }
     }
 
     /// <summary>
