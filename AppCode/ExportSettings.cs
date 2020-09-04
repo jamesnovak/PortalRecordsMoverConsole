@@ -28,8 +28,17 @@ namespace PortalRecordsMover.AppCode
             get { return $"RequireNewInstance=True;AuthType=Office365;Username={config.SourceUsername}; Password={config.SourcePassword};Url={config.SourceEnvironment}"; }
         }
         public string TargetConnectionString {
-            get { return $"RequireNewInstance=True;AuthType=Office365;Username={config.TargetUsername}; Password={config.TargetPassword};Url={config.TargetEnvironment}"; }
+            get { return GetTargetConnectionString(); }
         }
+
+        private string GetTargetConnectionString()
+        {
+            if (string.IsNullOrWhiteSpace(config.TargetAppSecret))
+                return $"RequireNewInstance=True;AuthType=Office365;Username={config.TargetUsername}; Password={config.TargetPassword};Url={config.TargetEnvironment}";
+            else
+                return $@"AuthType=ClientSecret;url={config.TargetEnvironment};ClientId={config.TargetAppId};ClientSecret={config.TargetAppSecret}";// $"RequireNewInstance=True;AuthType=ClientSecret;ClientId={config.TargetAppId};ClientSecret={config.TargetAppSecret};Url={config.TargetEnvironment}";
+        }
+
         /// <summary>
         /// List of EntityMetadata objects for items being processed
         /// </summary>
@@ -58,6 +67,8 @@ namespace PortalRecordsMover.AppCode
         {
             var sb = new StringBuilder();
 
+            string selectedEntitiesString = config.SelectedEntities == null ? "<UNDEFINED>" : string.Join(", ", config.SelectedEntities.ToArray());
+
             sb.AppendLine($"ActiveItemsOnly: {config.ActiveItemsOnly}")
                 .AppendLine($"CreateFilter: {config.CreateFilter}")
                 .AppendLine($"ModifyFilter: {config.ModifyFilter}")
@@ -74,7 +85,7 @@ namespace PortalRecordsMover.AppCode
                 .AppendLine($"SourceConnectionString: {SourceConnectionString}")
                 .AppendLine($"TargetEnvironment: {config.TargetEnvironment}")
                 .AppendLine($"TargetConnectionString: {TargetConnectionString}")
-                .AppendLine($"SelectedEntities:\n{string.Join(", ", config.SelectedEntities.ToArray())}");
+                .AppendLine($"SelectedEntities:\n{selectedEntitiesString}");
 
             return sb.ToString();
         }
@@ -118,7 +129,8 @@ namespace PortalRecordsMover.AppCode
                 }
             }
             else {
-                PortalMover.ReportProgress($"Unable to locate the configruation file {settings.SettingsFileName}.  Using Command Line args only.");
+                settings.Config = new MoverSettingsConfig();
+                PortalMover.ReportProgress($"Unable to locate the configuration file {settings.SettingsFileName}.  Using Command Line args only.");
             }
 
             // update settings object with override values from command line
@@ -189,6 +201,13 @@ namespace PortalRecordsMover.AppCode
                         settings.Config.TargetPassword = arg.Value;
                         break;
 
+                    case "targetappid":
+                        settings.Config.TargetAppId = arg.Value;
+                        break;
+                    case "targetappsecret":
+                        settings.Config.TargetAppSecret = arg.Value;
+                        break;
+
                     case "datefilteroptions":
                         settings.Config.DateFilterOptions = DateFilterOptionsEnum.CreateAndModify;
                         if (Enum.TryParse<DateFilterOptionsEnum>(arg.Value, out DateFilterOptionsEnum df)) {
@@ -206,8 +225,15 @@ namespace PortalRecordsMover.AppCode
                         }
                         break;
                     case "removejsrestriction":
-                        if (bool.TryParse(arg.Value, out var js)) {
+                        if (bool.TryParse(arg.Value, out var js))
+                        {
                             settings.Config.RemoveJavaScriptFileRestriction = js;
+                        }
+                        break;
+                    case "exportinfolderstructure":
+                        if (bool.TryParse(arg.Value, out var efs))
+                        {
+                            settings.Config.ExportInFolderStructure = efs;
                         }
                         break;
                     default:
@@ -273,9 +299,12 @@ namespace PortalRecordsMover.AppCode
 
             if (!string.IsNullOrEmpty(settings.Config.ImportFilename))
             {
-                if (string.IsNullOrEmpty(settings.Config.TargetUsername) || string.IsNullOrEmpty(settings.Config.TargetPassword))
+                if ((string.IsNullOrEmpty(settings.Config.TargetUsername) || string.IsNullOrEmpty(settings.Config.TargetPassword))
+                    &&
+                    (string.IsNullOrEmpty(settings.Config.TargetAppId) || string.IsNullOrEmpty(settings.Config.TargetAppSecret))
+                    )
                 {
-                    throw new ArgumentNullException("Target User name and password must be specified for Import");
+                    throw new ArgumentNullException("Target credentials must be specified for Import");
                 }
             }
             // update the import/export file name with the date, if the mask is present

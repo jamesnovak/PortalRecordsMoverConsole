@@ -28,6 +28,9 @@
 :: /targetuser:**  Username for the Target environment
 :: /targetpass:**  Password for the Target environment
 
+:: /targetappid:**  App ID for the target environment
+:: /targetappsecret:**  Client secret for the target environment
+
 :: If the /exportfile: or /importfile: are not specifed, the related action will not occur
 
 :: Passing in only the argument will null out any value found in the settings file.
