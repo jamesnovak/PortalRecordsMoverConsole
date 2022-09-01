@@ -35,6 +35,10 @@
 
   /* Remove JS restriction in system settings */
   "RemoveJavaScriptFileRestriction": true,
+
+  /* Export in folder structure - false = all entities in one XML file */
+  "ExportInFolderStructure": false,
+
   /*
     Clean target organization annotation for web file so that only the annotation you import is kept in the web file
   */
